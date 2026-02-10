@@ -99,7 +99,11 @@ DEFAULT_EQ_PRESETS: list[EQPreset] = [
 def _derive_key() -> bytes:
     """Derive a machine-specific encryption key for password storage."""
     # Use a combination of hostname and username as salt
-    machine_id = f"{os.uname().nodename}:{os.getlogin()}"
+    try:
+        username = os.getlogin()
+    except OSError:
+        username = os.environ.get("USER", os.environ.get("USERNAME", "default"))
+    machine_id = f"{os.uname().nodename}:{username}"
     return hashlib.pbkdf2_hmac(
         "sha256",
         machine_id.encode(),
