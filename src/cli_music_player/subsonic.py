@@ -417,6 +417,33 @@ class SubsonicClient:
         """Report a song as currently playing (non-submission scrobble)."""
         self.scrobble(song_id, submission=False)
 
+    # ─── Lyrics ────────────────────────────────────────────────────────
+
+    def get_lyrics(self, artist: str = "", title: str = "") -> str:
+        """Get lyrics for a song."""
+        params: dict[str, str] = {}
+        if artist:
+            params["artist"] = artist
+        if title:
+            params["title"] = title
+        resp = self._request("getLyrics.view", **params)
+        lyrics_data = resp.get("lyrics", {})
+        return lyrics_data.get("value", "")
+
+    # ─── Similar / Discovery ─────────────────────────────────────────
+
+    def get_similar_songs(self, song_id: str, count: int = 50) -> list[Song]:
+        """Get songs similar to a given song."""
+        resp = self._request("getSimilarSongs2.view", id=song_id, count=count)
+        similar = resp.get("similarSongs2", {})
+        return [Song.from_api(s) for s in similar.get("song", [])]
+
+    def get_top_songs(self, artist_name: str, count: int = 50) -> list[Song]:
+        """Get top songs for an artist (via Last.fm data)."""
+        resp = self._request("getTopSongs.view", artist=artist_name, count=count)
+        top = resp.get("topSongs", {})
+        return [Song.from_api(s) for s in top.get("song", [])]
+
     # ─── URL Builders (for external use) ─────────────────────────────
 
     def stream_url(self, song_id: str) -> str:

@@ -18,6 +18,23 @@ class QueueItemSelected(Message):
         self.song = song
 
 
+class QueueRemoveRequest(Message):
+    """Message requesting removal of a queue item."""
+
+    def __init__(self, index: int):
+        super().__init__()
+        self.index = index
+
+
+class QueueMoveRequest(Message):
+    """Message requesting a queue item be moved."""
+
+    def __init__(self, from_index: int, to_index: int):
+        super().__init__()
+        self.from_index = from_index
+        self.to_index = to_index
+
+
 class QueueView(Widget):
     """Sidebar widget showing the play queue."""
 
@@ -61,7 +78,7 @@ class QueueView(Widget):
         self._current_index: int = -1
 
     def compose(self) -> ComposeResult:
-        yield Static("🎵 Play Queue", classes="queue-header")
+        yield Static("Play Queue", classes="queue-header")
         yield Static("0 songs", classes="queue-info", id="queue-info")
         yield DataTable(id="queue-table")
 
@@ -71,6 +88,12 @@ class QueueView(Widget):
         table.zebra_stripes = True
         table.add_columns("#", "Title", "Duration")
 
+    def _title_max_len(self) -> int:
+        """Calculate max title length based on widget width."""
+        # Width minus columns: #(4) + Duration(6) + padding/borders(~5)
+        available = self.size.width - 15
+        return max(10, available)
+
     def update_queue(self, songs: list[Song], current_index: int = -1):
         """Update the queue display."""
         self._songs = list(songs)
@@ -79,11 +102,16 @@ class QueueView(Widget):
         table = self.query_one("#queue-table", DataTable)
         table.clear()
 
+        max_title = self._title_max_len()
+
         for i, song in enumerate(songs):
-            marker = "▶ " if i == current_index else "  "
+            marker = ">" if i == current_index else " "
+            title = song.title
+            if len(title) > max_title:
+                title = title[: max_title - 1] + "…"
             table.add_row(
                 f"{marker}{i + 1}",
-                song.title[:20],
+                title,
                 format_duration(song.duration),
                 key=str(i),
             )
@@ -91,7 +119,7 @@ class QueueView(Widget):
         info = self.query_one("#queue-info", Static)
         total = sum(s.duration for s in songs)
         info.update(
-            f"{len(songs)} songs • {format_duration(total)}"
+            f"{len(songs)} songs | {format_duration(total)}"
         )
 
     def get_selected_index(self) -> int:
@@ -100,3 +128,11 @@ class QueueView(Widget):
         if table.cursor_row is not None and table.cursor_row < len(self._songs):
             return table.cursor_row
         return -1
+
+    def is_focused(self) -> bool:
+        """Check if the queue table has focus."""
+        try:
+            table = self.query_one("#queue-table", DataTable)
+            return table.has_focus
+        except Exception:
+            return False

@@ -301,7 +301,7 @@ class LibraryBrowser(Widget):
         self._current_songs: list[Song] = []
 
     def compose(self) -> ComposeResult:
-        yield Static("📚 Library", classes="browser-header", id="browser-header")
+        yield Static("Library", classes="browser-header", id="browser-header")
         yield Static("", classes="browser-nav", id="browser-nav")
         with TabbedContent(id="browser-tabs"):
             with TabPane("Albums", id="tab-albums"):
@@ -314,6 +314,10 @@ class LibraryBrowser(Widget):
                 yield PlaylistList(id="playlist-list")
             with TabPane("Genres", id="tab-genres"):
                 yield GenreList(id="genre-list")
+            with TabPane("Starred", id="tab-starred"):
+                yield SongTable(id="starred-songs")
+            with TabPane("History", id="tab-history"):
+                yield SongTable(id="history-songs")
 
     def set_breadcrumb(self, *parts: str):
         self._breadcrumb = list(parts)
