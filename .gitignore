@@ -1,0 +1,17 @@
+# Build artifacts
+*.deb
+dist/
+build/
+*.egg-info/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+venv/
+
+# IDE
+.vscode/
+.idea/

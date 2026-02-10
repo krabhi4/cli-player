@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cli-music-player"
+version = "1.0.0"
+description = "A terminal-based music player for Navidrome instances"
+requires-python = ">=3.11"
+dependencies = [
+    "textual>=0.47",
+    "python-mpv>=1.0",
+    "requests>=2.31",
+    "keyring>=25.0",
+    "cryptography>=42.0",
+]
+
+[project.scripts]
+music-player = "cli_music_player.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+cli_music_player = ["styles/*.tcss"]
