@@ -34,7 +34,7 @@ from .widgets.browser import (
 )
 from .widgets.equalizer import EqualizerWidget
 from .widgets.help import HelpModal
-from .widgets.now_playing import NowPlaying
+from .widgets.now_playing import NowPlaying, SeekBar, ControlBtn
 from .widgets.queue_view import QueueView
 from .widgets.search import SearchModal
 from .widgets.server_mgr import ServerManagerModal
@@ -71,6 +71,7 @@ class MusicPlayerApp(App):
         Binding("f", "toggle_star", "Star", show=False),
         Binding("S", "open_servers", "Servers", show=True),
         Binding("question_mark", "show_help", "Help", show=True),
+        Binding("i", "show_help", "Info", show=False),
         Binding("1", "tab_albums", "Albums", show=False),
         Binding("2", "tab_artists", "Artists", show=False),
         Binding("3", "tab_songs", "Songs", show=False),
@@ -481,6 +482,10 @@ class MusicPlayerApp(App):
 
     def action_seek_backward_long(self) -> None:
         self.player.seek(-30)
+
+    def action_seek_to(self, position: float) -> None:
+        """Seek to an absolute position (from clickable seekbar)."""
+        self.player.seek_to(position)
 
     def action_volume_up(self) -> None:
         self.player.volume_up()
