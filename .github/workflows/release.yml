@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libmpv-dev mpv dpkg-dev fakeroot
+        python -m pip install --upgrade pip
+        pip install build
+
+    - name: Run tests
+      run: |
+        pip install -e .
+        cd tests
+        python run_all_tests.py
+
+    - name: Build Python package
+      run: python -m build
+
+    - name: Build .deb package
+      run: |
+        chmod +x build-deb.sh
+        ./build-deb.sh
+
+    - name: Extract version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+          *.deb
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          ## Installation
+
+          ### Debian/Ubuntu (.deb)
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/cli-music-player_${{ steps.get_version.outputs.VERSION }}_all.deb
+          sudo dpkg -i cli-music-player_${{ steps.get_version.outputs.VERSION }}_all.deb
+          ```
+
+          ### pip (Python package)
+          ```bash
+          pip install https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/cli_music_player-${{ steps.get_version.outputs.VERSION }}-py3-none-any.whl
+          ```
+
+          ### From source
+          ```bash
+          pip install https://github.com/${{ github.repository }}/releases/download/v${{ steps.get_version.outputs.VERSION }}/cli-music-player-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          ```
+
+          ## What's Changed
+          See the full changelog below.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

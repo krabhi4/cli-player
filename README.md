@@ -161,12 +161,42 @@ All fixes verified through automated test suite (24 tests, 100% pass rate).
 - **Responsive queue** — Queue title truncation adapts to widget width
 - **Better error feedback** — Errors surfaced to status bar instead of silently swallowed
 
+## Testing
+
+The project includes a comprehensive automated test suite with **121 tests** covering all major components.
+
+### Run Tests
+
+```bash
+# Run all tests
+python3 tests/run_all_tests.py
+
+# Run specific category
+python3 tests/run_all_tests.py --category "Bug Fixes (v2.0.1)"
+
+# Run individual test file
+python3 tests/test_queue.py
+```
+
+### Test Coverage
+
+- ✅ **Bug Fixes (v2.0.1)**: 24 tests - All 12 critical bugs verified
+- ✅ **Queue Manager**: 31 tests - Queue operations, shuffle, repeat
+- ✅ **Subsonic API**: 16 tests - Data models, requests, authentication
+- ✅ **Configuration**: 23 tests - Settings, encryption, persistence
+- ✅ **Equalizer**: 27 tests - 18-band EQ, dB conversion, presets
+
+**Total: 121 tests | Pass Rate: 100% | Execution Time: <0.4s**
+
+See [tests/README.md](tests/README.md) for detailed testing documentation.
+
 ## Contributing
 
 Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a PR.
 
 - Fork the repo, create a feature branch, open a PR
 - PRs require 1 approval before merge
+- All PRs must pass automated tests (121 tests, 100% pass rate required)
 - See [open issues](https://github.com/krabhi4/cli-player/issues) for things to work on
 
 ## License
