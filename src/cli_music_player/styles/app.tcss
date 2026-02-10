@@ -170,6 +170,34 @@ Button.-error {
     color: #1a1b26;
 }
 
+/* ─── Modal Close Buttons ──────────────────────────────── */
+
+#search-close-btn {
+    min-width: 10;
+    height: 1;
+    border: none;
+    background: #f7768e;
+    color: #1a1b26;
+    text-style: bold;
+    padding: 0;
+    margin: 0;
+}
+
+#search-close-btn:hover {
+    background: #ff9e9e;
+}
+
+#help-close-btn {
+    min-width: 20;
+    background: #7aa2f7;
+    color: #1a1b26;
+    text-style: bold;
+}
+
+#help-close-btn:hover {
+    background: #7dcfff;
+}
+
 /* ─── Inputs ────────────────────────────────────────────── */
 
 Input {

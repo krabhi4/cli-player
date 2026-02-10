@@ -79,27 +79,19 @@ class Player:
             if self.on_state_change:
                 self.on_state_change(self._state)
 
-        # End of file handler
+        # End of file detection via event callback.
+        # In python-mpv 1.0.x the event data lives at event.data with
+        # event.data.reason == 0 meaning natural EOF.
         @self._mpv.event_callback("end-file")
         def _eof_handler(event):
-            if event.get("event", {}).get("reason") == "eof" or (
-                hasattr(event, "event") and hasattr(event.event, 'reason')
-            ):
-                try:
-                    reason = event["event"]["reason"]
-                except (KeyError, TypeError):
-                    try:
-                        reason = event.event.reason if hasattr(event, 'event') else None
-                    except Exception:
-                        reason = None
-
-                if reason is not None:
-                    # Convert MpvEventEndFile.REASON to check for EOF
-                    reason_val = int(reason) if not isinstance(reason, int) else reason
-                    if reason_val == 0:  # EOF = 0
+            try:
+                if event.data.reason == 0:  # 0 = EOF (natural end)
+                    if self._state == PlaybackState.PLAYING:
                         self._state = PlaybackState.STOPPED
                         if self.on_track_end:
                             self.on_track_end()
+            except Exception:
+                pass
 
     def play(self, url: str, song: Optional[Song] = None):
         """Play a song from a URL."""
@@ -135,11 +127,13 @@ class Player:
 
     def stop(self):
         """Stop playback."""
-        if self._mpv:
-            self._mpv.stop()
+        # Set state BEFORE mpv.stop() so the eof-reached observer
+        # won't mistake a manual stop for a natural end-of-track.
         self._state = PlaybackState.STOPPED
         self._current_song = None
         self._position = 0.0
+        if self._mpv:
+            self._mpv.stop()
         if self.on_state_change:
             self.on_state_change(self._state)
 

@@ -7,7 +7,7 @@
 set -euo pipefail
 
 APP_NAME="cli-music-player"
-VERSION="1.0.0"
+VERSION="1.5.0"
 ARCH=$(dpkg --print-architecture 2>/dev/null || echo "amd64")
 INSTALL_DIR="/opt/${APP_NAME}"
 PKG_DIR="$(mktemp -d)"

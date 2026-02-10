@@ -203,6 +203,11 @@ class NowPlaying(Widget):
         text-align: right;
     }
 
+    NowPlaying .np-server:hover {
+        color: #7aa2f7;
+        text-style: underline;
+    }
+
     NowPlaying .np-spacer {
         width: 1fr;
     }
@@ -249,10 +254,10 @@ class NowPlaying(Widget):
             yield ControlBtn("ℹ", "show_help", id="btn-info")
             yield Static("", classes="np-spacer")
             yield Static("🔊 75%", id="np-volume", classes="np-volume")
-        # Row 4: Modes + server
+        # Row 4: Modes + server (server name is clickable)
         with Horizontal(classes="np-row4"):
             yield Static("", id="np-modes", classes="np-modes")
-            yield Static("", id="np-server", classes="np-server")
+            yield ControlBtn("", "open_servers", id="np-server", classes="np-server")
 
     def on_mount(self) -> None:
         """Force refresh all displays after mount."""
@@ -341,8 +346,8 @@ class NowPlaying(Widget):
 
     def watch_server_name(self, value: str) -> None:
         try:
-            server_w = self.query_one("#np-server", Static)
-            server_w.update(f"🖥 {value}" if value else "")
+            server_w = self.query_one("#np-server", ControlBtn)
+            server_w.label = f"🖥 {value}" if value else ""
         except Exception:
             pass
 

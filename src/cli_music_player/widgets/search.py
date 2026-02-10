@@ -1,9 +1,9 @@
 """Search modal widget."""
 
 from textual.app import ComposeResult
-from textual.containers import Vertical
+from textual.containers import Vertical, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Input, Label, DataTable, Static, TabbedContent, TabPane
+from textual.widgets import Button, Input, Label, DataTable, Static, TabbedContent, TabPane
 
 from ..subsonic import SubsonicClient, Artist, Album, Song
 from ..utils import format_duration
@@ -35,12 +35,32 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
         padding: 1;
     }
 
+    SearchModal .search-header {
+        height: 1;
+        width: 1fr;
+        margin-bottom: 1;
+    }
+
     SearchModal .search-title {
         text-style: bold;
         color: $text;
-        text-align: center;
+        width: 1fr;
+        content-align: center middle;
+    }
+
+    SearchModal #search-close-btn {
+        min-width: 10;
         height: 1;
-        margin-bottom: 1;
+        border: none;
+        background: #f7768e;
+        color: #1a1b26;
+        text-style: bold;
+        padding: 0;
+        margin: 0;
+    }
+
+    SearchModal #search-close-btn:hover {
+        background: #ff9e9e;
     }
 
     SearchModal Input {
@@ -69,7 +89,9 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static("🔍 Search Library", classes="search-title")
+            with Horizontal(classes="search-header"):
+                yield Static("🔍 Search Library", classes="search-title")
+                yield Button("✕ Close", id="search-close-btn")
             yield Input(placeholder="Type to search…", id="search-input")
             yield Static("Type at least 2 characters to search", classes="search-status", id="search-status")
             with TabbedContent(id="search-tabs"):
@@ -140,7 +162,15 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
                     key=artist.id,
                 )
 
-            total = len(artists) + len(albums) + len(songs)
+            # Update tab labels with result counts
+            try:
+                tabs = self.query_one("#search-tabs", TabbedContent)
+                tabs.get_tab("search-tab-songs").label = f"Songs ({len(songs)})"
+                tabs.get_tab("search-tab-albums").label = f"Albums ({len(albums)})"
+                tabs.get_tab("search-tab-artists").label = f"Artists ({len(artists)})"
+            except Exception:
+                pass
+
             status.update(
                 f"Found {len(songs)} songs, {len(albums)} albums, {len(artists)} artists"
             )
@@ -156,6 +186,10 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
             self.dismiss(self.results.albums[event.cursor_row])
         elif table_id == "search-artists" and event.cursor_row < len(self.results.artists):
             self.dismiss(self.results.artists[event.cursor_row])
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "search-close-btn":
+            self.dismiss(None)
 
     def action_dismiss_search(self) -> None:
         self.dismiss(None)

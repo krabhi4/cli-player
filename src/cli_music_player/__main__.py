@@ -3,11 +3,18 @@
 import argparse
 import sys
 
+from . import __version__
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="CLI Music Player for Navidrome",
         prog="music-player",
+    )
+    parser.add_argument(
+        "-v", "-V", "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
     )
     parser.add_argument(
         "--config-dir",
