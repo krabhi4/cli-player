@@ -1,5 +1,9 @@
 # 🎵 CLI Music Player for Navidrome
 
+[![GitHub release](https://img.shields.io/github/v/release/krabhi4/cli-player)](https://github.com/krabhi4/cli-player/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 A terminal-based music player that connects to Navidrome instances and plays music locally through your server's speakers.
 
 ## Features
@@ -24,14 +28,14 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 
 ## Installation
 
-### Option 1: Install via .deb package (recommended)
+### Option 1: Download the .deb from Releases (recommended)
 
 ```bash
-# Build the .deb
-./build-deb.sh
+# Download the latest release from GitHub
+# https://github.com/krabhi4/cli-player/releases
 
 # Install it
-sudo dpkg -i cli-music-player_1.0.0_amd64.deb
+sudo dpkg -i cli-music-player_1.5.0_amd64.deb
 
 # Run from anywhere
 music-player
@@ -48,19 +52,23 @@ To uninstall:
 sudo dpkg -r cli-music-player
 ```
 
-### Option 2: Run from source
+### Option 2: Build .deb from source
 
 ```bash
-# Clone and enter directory
-git clone <repo-url>
-cd cli-music-player
+git clone https://github.com/krabhi4/cli-player.git
+cd cli-player
+./build-deb.sh
+sudo dpkg -i cli-music-player_1.5.0_amd64.deb
+```
 
-# Create venv and install
+### Option 3: Run from source (development)
+
+```bash
+git clone https://github.com/krabhi4/cli-player.git
+cd cli-player
 python3 -m venv venv
 source venv/bin/activate
 pip install -e .
-
-# Run
 python3 -m cli_music_player
 ```
 
@@ -103,3 +111,15 @@ Config is stored at `~/.config/cli-music-player/config.json` and includes:
 - Shuffle/repeat preferences
 - Custom EQ presets
 - Audio device setting
+
+## Contributing
+
+Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md) before submitting a PR.
+
+- Fork the repo, create a feature branch, open a PR
+- PRs require 1 approval before merge
+- See [open issues](https://github.com/krabhi4/cli-player/issues) for things to work on
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
