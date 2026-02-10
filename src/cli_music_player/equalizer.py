@@ -1,19 +1,51 @@
 """Equalizer engine using mpv's superequalizer audio filter."""
 
 from typing import Optional
-from .config import AppConfig, EQPreset
 
+from .config import AppConfig, EQPreset
 
 # 18-band superequalizer frequencies (Hz)
 EQ_BANDS = [
-    65, 92, 131, 185, 262, 370, 523, 740, 1047,
-    1480, 2093, 2960, 4186, 5920, 8372, 11840, 16744, 20000,
+    65,
+    92,
+    131,
+    185,
+    262,
+    370,
+    523,
+    740,
+    1047,
+    1480,
+    2093,
+    2960,
+    4186,
+    5920,
+    8372,
+    11840,
+    16744,
+    20000,
 ]
 
 # Band labels for display
 EQ_BAND_LABELS = [
-    "65", "92", "131", "185", "262", "370", "523", "740", "1K",
-    "1.5K", "2.1K", "3K", "4.2K", "5.9K", "8.4K", "12K", "17K", "20K",
+    "65",
+    "92",
+    "131",
+    "185",
+    "262",
+    "370",
+    "523",
+    "740",
+    "1K",
+    "1.5K",
+    "2.1K",
+    "3K",
+    "4.2K",
+    "5.9K",
+    "8.4K",
+    "12K",
+    "17K",
+    "20K",
 ]
 
 # Gain range in dB
@@ -51,16 +83,22 @@ class Equalizer:
         parts = []
         for i, gain in enumerate(self.gains):
             band_num = i + 1
-            # superequalizer gain is in dB, range roughly -20 to +20
+            # Clamp gain to valid dB range
             clamped = max(GAIN_MIN, min(GAIN_MAX, gain))
-            # mpv superequalizer expects absolute level, where 0dB = 1.0
-            # Convert dB gain to linear multiplier then to superequalizer value
-            # Actually superequalizer takes dB values directly: 0 = no change
-            # Values > 0 boost, values < 0 cut; range is roughly 0-20
-            # The parameter is actually a positive multiplier where ~2 = +6dB
-            # Let's use the simpler approach: map -12..+12 dB to 0..24
-            level = clamped + 12  # Shift to 0..24 range
-            parts.append(f"{band_num}b={level:.1f}")
+
+            # Convert dB to linear gain multiplier
+            # Formula: linear_gain = 10^(dB/20)
+            # superequalizer expects linear multipliers where:
+            #   1.0 = no change (0 dB)
+            #   2.0 ≈ +6 dB
+            #   0.5 ≈ -6 dB
+            # Valid range is 0 to 20
+            import math
+
+            linear_gain = math.pow(10, clamped / 20.0)
+            # Clamp to superequalizer's valid range
+            linear_gain = max(0.0, min(20.0, linear_gain))
+            parts.append(f"{band_num}b={linear_gain:.3f}")
 
         return f"superequalizer={':'.join(parts)}"
 

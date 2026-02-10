@@ -39,7 +39,7 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 # https://github.com/krabhi4/cli-player/releases
 
 # Install it
-sudo dpkg -i cli-music-player_2.0.0_amd64.deb
+sudo dpkg -i cli-music-player_2.0.1_amd64.deb
 
 # Run from anywhere
 music-player
@@ -62,7 +62,7 @@ sudo dpkg -r cli-music-player
 git clone https://github.com/krabhi4/cli-player.git
 cd cli-player
 ./build-deb.sh
-sudo dpkg -i cli-music-player_2.0.0_amd64.deb
+sudo dpkg -i cli-music-player_2.0.1_amd64.deb
 ```
 
 ### Option 3: Run from source (development)
@@ -123,7 +123,31 @@ Config is stored at `~/.config/cli-music-player/config.json` and includes:
 - Custom EQ presets
 - Audio device setting
 
-## What's New in 2.0.0
+## What's New
+
+### v2.0.1 (2026-02-11) - Bug Fix Release
+
+This release fixes **12 critical and high-priority bugs** identified through comprehensive code review:
+
+**Critical Fixes:**
+- **Fixed double scrobbling** — Songs were being scrobbled twice (at 50% completion AND at track end)
+- **Fixed thread safety** — Added safe `jump_to()` method for queue navigation, preventing race conditions
+- **Fixed resource leak** — HTTP sessions are now properly closed, preventing connection pool exhaustion
+- **Fixed password decryption crash** — Gracefully handles decryption failures (e.g., when moving config between machines)
+
+**High-Priority Fixes:**
+- **Fixed queue management** — Proper handling of empty queue and index bounds after removing songs
+- **Fixed player observers** — Thread-safe locks on all property observers (position/duration/state)
+- **Fixed search race condition** — Bounds checking prevents crashes when results change during selection
+- **Fixed negative indices** — Explicit validation in queue move operations
+- **Fixed memory leak** — Navigation history now limited to 50 entries to prevent unbounded growth
+- **Fixed equalizer conversion** — Corrected dB-to-linear formula (now uses `10^(dB/20)` instead of incorrect shift)
+- **Fixed HTTP timeouts** — Timeout now explicitly enforced on all requests
+- **Fixed EQ click handling** — Added bounds clamping and division-by-zero protection for small widgets
+
+All fixes verified through automated test suite (24 tests, 100% pass rate).
+
+### v2.0.0 (2026-02-09) - Major UX Overhaul
 
 - **Starred/Favourites tab** — Browse your starred songs (tab `6`)
 - **Queue management** — Remove (`d`/`Delete`) and reorder (`Shift+Up/Down`) queue items

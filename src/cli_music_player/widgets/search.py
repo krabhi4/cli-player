@@ -1,11 +1,19 @@
 """Search modal widget."""
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal
+from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import Button, Input, Label, DataTable, Static, TabbedContent, TabPane
+from textual.widgets import (
+    Button,
+    DataTable,
+    Input,
+    Label,
+    Static,
+    TabbedContent,
+    TabPane,
+)
 
-from ..subsonic import SubsonicClient, Artist, Album, Song
+from ..subsonic import Album, Artist, Song, SubsonicClient
 from ..utils import format_duration
 
 
@@ -93,7 +101,11 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
                 yield Static("🔍 Search Library", classes="search-title")
                 yield Button("✕ Close", id="search-close-btn")
             yield Input(placeholder="Type to search…", id="search-input")
-            yield Static("Type at least 2 characters to search", classes="search-status", id="search-status")
+            yield Static(
+                "Type at least 2 characters to search",
+                classes="search-status",
+                id="search-status",
+            )
             with TabbedContent(id="search-tabs"):
                 with TabPane(f"Songs (0)", id="search-tab-songs"):
                     yield DataTable(id="search-songs")
@@ -138,8 +150,11 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
             songs_table.clear()
             for i, song in enumerate(songs):
                 songs_table.add_row(
-                    str(i + 1), song.title, song.artist,
-                    song.album, format_duration(song.duration),
+                    str(i + 1),
+                    song.title,
+                    song.artist,
+                    song.album,
+                    format_duration(song.duration),
                     key=song.id,
                 )
 
@@ -148,7 +163,8 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
             albums_table.clear()
             for album in albums:
                 albums_table.add_row(
-                    album.name, album.artist,
+                    album.name,
+                    album.artist,
                     str(album.year) if album.year else "",
                     key=album.id,
                 )
@@ -158,7 +174,8 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
             artists_table.clear()
             for artist in artists:
                 artists_table.add_row(
-                    artist.name, str(artist.album_count),
+                    artist.name,
+                    str(artist.album_count),
                     key=artist.id,
                 )
 
@@ -180,12 +197,22 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         table_id = event.data_table.id
-        if table_id == "search-songs" and event.cursor_row < len(self.results.songs):
-            self.dismiss(self.results.songs[event.cursor_row])
-        elif table_id == "search-albums" and event.cursor_row < len(self.results.albums):
-            self.dismiss(self.results.albums[event.cursor_row])
-        elif table_id == "search-artists" and event.cursor_row < len(self.results.artists):
-            self.dismiss(self.results.artists[event.cursor_row])
+        try:
+            if table_id == "search-songs" and 0 <= event.cursor_row < len(
+                self.results.songs
+            ):
+                self.dismiss(self.results.songs[event.cursor_row])
+            elif table_id == "search-albums" and 0 <= event.cursor_row < len(
+                self.results.albums
+            ):
+                self.dismiss(self.results.albums[event.cursor_row])
+            elif table_id == "search-artists" and 0 <= event.cursor_row < len(
+                self.results.artists
+            ):
+                self.dismiss(self.results.artists[event.cursor_row])
+        except (IndexError, AttributeError):
+            # Results were cleared or modified during selection
+            pass
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "search-close-btn":

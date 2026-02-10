@@ -61,23 +61,28 @@ class Player:
         @self._mpv.property_observer("time-pos")
         def _time_pos_observer(_name, value):
             if value is not None:
-                self._position = float(value)
-                if self.on_position_update and self._duration > 0:
-                    self.on_position_update(self._position, self._duration)
+                with self._lock:
+                    self._position = float(value)
+                    duration = self._duration
+                if self.on_position_update and duration > 0:
+                    self.on_position_update(self._position, duration)
 
         @self._mpv.property_observer("duration")
         def _duration_observer(_name, value):
             if value is not None:
-                self._duration = float(value)
+                with self._lock:
+                    self._duration = float(value)
 
         @self._mpv.property_observer("pause")
         def _pause_observer(_name, value):
-            if value is True:
-                self._state = PlaybackState.PAUSED
-            elif value is False and self._current_song:
-                self._state = PlaybackState.PLAYING
+            with self._lock:
+                if value is True:
+                    self._state = PlaybackState.PAUSED
+                elif value is False and self._current_song:
+                    self._state = PlaybackState.PLAYING
+                state = self._state
             if self.on_state_change:
-                self.on_state_change(self._state)
+                self.on_state_change(state)
 
         # End of file detection via event callback.
         # In python-mpv 1.0.x the event data lives at event.data with

@@ -117,11 +117,23 @@ class QueueManager:
         """Remove a song by queue index."""
         if 0 <= index < len(self._queue):
             self._queue.pop(index)
+            # Also remove from original queue if present
+            if index < len(self._original_queue):
+                try:
+                    self._original_queue.pop(index)
+                except IndexError:
+                    pass
+
             if index < self._current_index:
                 self._current_index -= 1
             elif index == self._current_index:
-                if self._current_index >= len(self._queue):
+                # If queue is now empty, set to -1
+                if len(self._queue) == 0:
+                    self._current_index = -1
+                # If removed item was at the end, move back one
+                elif self._current_index >= len(self._queue):
                     self._current_index = len(self._queue) - 1
+                # Otherwise current_index stays the same (points to next song)
 
     def clear(self):
         """Clear the entire queue."""
@@ -131,11 +143,19 @@ class QueueManager:
         self._history.clear()
 
     def move(self, from_idx: int, to_idx: int):
-        """Move a song from one position to another."""
-        if (
-            0 <= from_idx < len(self._queue)
-            and 0 <= to_idx < len(self._queue)
-        ):
+        """Move a song from one position to another.
+
+        Args:
+            from_idx: Source index (must be >= 0)
+            to_idx: Destination index (must be >= 0)
+
+        Returns silently if indices are invalid.
+        """
+        # Explicitly reject negative indices
+        if from_idx < 0 or to_idx < 0:
+            return
+
+        if from_idx < len(self._queue) and to_idx < len(self._queue):
             song = self._queue.pop(from_idx)
             self._queue.insert(to_idx, song)
             # Adjust current_index
@@ -156,11 +176,7 @@ class QueueManager:
 
         if self._shuffle:
             self._history.append(self._current_index)
-            remaining = [
-                i
-                for i in range(len(self._queue))
-                if i != self._current_index
-            ]
+            remaining = [i for i in range(len(self._queue)) if i != self._current_index]
             if remaining:
                 self._current_index = random.choice(remaining)
             elif self._repeat == RepeatMode.ALL:
@@ -192,6 +208,16 @@ class QueueManager:
             return None
 
         return self.current_song
+
+    def jump_to(self, index: int) -> Optional[Song]:
+        """Jump to a specific index in the queue and return the song."""
+        if 0 <= index < len(self._queue):
+            self._current_index = index
+            # Clear shuffle history when manually jumping
+            if self._shuffle:
+                self._history = []
+            return self.current_song
+        return None
 
     def toggle_shuffle(self):
         """Toggle shuffle mode."""

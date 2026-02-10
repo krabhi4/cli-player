@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cli-music-player"
-version = "2.0.0"
+version = "2.0.1"
 description = "A terminal-based music player for Navidrome instances"
 license = {text = "MIT"}
 requires-python = ">=3.11"

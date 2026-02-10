@@ -2,11 +2,10 @@
 
 import hashlib
 import secrets
-from typing import Any, Optional
 from dataclasses import dataclass, field
+from typing import Any, Optional
 
 import requests
-
 
 API_VERSION = "1.16.1"
 CLIENT_NAME = "CLIMusicPlayer"
@@ -163,6 +162,15 @@ class SubsonicClient:
         self.session = requests.Session()
         self.session.timeout = 15
 
+    def close(self):
+        """Close the HTTP session and release resources."""
+        if self.session:
+            self.session.close()
+
+    def __del__(self):
+        """Cleanup when the client is destroyed."""
+        self.close()
+
     def _auth_params(self) -> dict:
         """Generate authentication parameters using token+salt method."""
         salt = secrets.token_hex(16)
@@ -183,12 +191,17 @@ class SubsonicClient:
         all_params.update(params)
 
         try:
-            resp = self.session.get(url, params=all_params)
+            # Explicitly pass timeout to enforce it on this request
+            resp = self.session.get(
+                url, params=all_params, timeout=self.session.timeout
+            )
             resp.raise_for_status()
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.Timeout as e:
             raise ConnectionError(
-                f"Cannot connect to {self.base_url}: {e}"
+                f"Request timed out after {self.session.timeout}s: {e}"
             ) from e
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(f"Cannot connect to {self.base_url}: {e}") from e
         except requests.exceptions.RequestException as e:
             raise ConnectionError(f"Request failed: {e}") from e
 
@@ -248,9 +261,7 @@ class SubsonicClient:
         resp = self._request("getArtist.view", id=artist_id)
         artist_data = resp.get("artist", {})
         artist = Artist.from_api(artist_data)
-        albums = [
-            Album.from_api(a) for a in artist_data.get("album", [])
-        ]
+        albums = [Album.from_api(a) for a in artist_data.get("album", [])]
         return artist, albums
 
     def get_album(self, album_id: str) -> tuple[Album, list[Song]]:
@@ -343,9 +354,7 @@ class SubsonicClient:
         """Get all playlists."""
         resp = self._request("getPlaylists.view")
         playlist_data = resp.get("playlists", {})
-        return [
-            Playlist.from_api(p) for p in playlist_data.get("playlist", [])
-        ]
+        return [Playlist.from_api(p) for p in playlist_data.get("playlist", [])]
 
     def get_playlist(self, playlist_id: str) -> tuple[Playlist, list[Song]]:
         """Get a playlist and its songs."""
@@ -390,9 +399,7 @@ class SubsonicClient:
             params["artistId"] = artist_id
         self._request("star.view", **params)
 
-    def unstar(
-        self, song_id: str = "", album_id: str = "", artist_id: str = ""
-    ):
+    def unstar(self, song_id: str = "", album_id: str = "", artist_id: str = ""):
         """Unstar an item."""
         params: dict[str, str] = {}
         if song_id:

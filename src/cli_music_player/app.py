@@ -8,39 +8,48 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.widgets import DataTable, Footer, Header, Static, Label, Select, TabbedContent, Input, Button
+from textual.widgets import (
+    Button,
+    DataTable,
+    Footer,
+    Header,
+    Input,
+    Label,
+    Select,
+    Static,
+    TabbedContent,
+)
 
 from .config import AppConfig
 from .equalizer import Equalizer
-from .player import Player, PlaybackState
+from .player import PlaybackState, Player
 from .queue import QueueManager, RepeatMode
 from .subsonic import (
-    SubsonicClient,
-    Song,
     Album,
     Artist,
-    Playlist,
     Genre,
+    Playlist,
+    Song,
+    SubsonicClient,
     SubsonicError,
 )
 from .widgets.browser import (
-    LibraryBrowser,
-    SongTable,
+    AddToQueue,
     AlbumList,
     ArtistList,
-    PlaylistList,
     GenreList,
+    LibraryBrowser,
+    PlaylistList,
     SongSelected,
-    AddToQueue,
+    SongTable,
 )
 from .widgets.equalizer import EqualizerWidget
 from .widgets.help import HelpModal
 from .widgets.lyrics import LyricsPanel
-from .widgets.now_playing import NowPlaying, SeekBar, ControlBtn
+from .widgets.now_playing import ControlBtn, NowPlaying, SeekBar
 from .widgets.queue_view import QueueView
 from .widgets.search import SearchModal
 from .widgets.server_mgr import ServerManagerModal
-
 
 # Album sort types supported by the Subsonic API
 ALBUM_SORT_TYPES = [
@@ -204,8 +213,9 @@ class MusicPlayerApp(App):
         self._current_album_songs: list[Song] = []
         self._scrobble_reported = False
 
-        # Navigation history for back navigation
+        # Navigation history for back navigation (limit to prevent memory bloat)
         self._nav_history: list[dict] = []
+        self._max_nav_history = 50  # Maximum navigation history entries
 
         # Album sort state
         self._album_sort_index: int = 0
@@ -224,9 +234,7 @@ class MusicPlayerApp(App):
                     # Welcome screen — no server configured
                     with Vertical(id="welcome"):
                         with Vertical(id="welcome-box"):
-                            yield Static(
-                                "CLI Music Player", classes="welcome-title"
-                            )
+                            yield Static("CLI Music Player", classes="welcome-title")
                             yield Static(
                                 "\nNo servers configured yet.\n"
                                 "Press [bold]S[/bold] to add a Navidrome server.\n",
@@ -327,9 +335,7 @@ class MusicPlayerApp(App):
             # Update browser header
             try:
                 browser = self.query_one("#library-browser", LibraryBrowser)
-                browser.set_header(
-                    f"{self.config.active_server.name} - Library"
-                )
+                browser.set_header(f"{self.config.active_server.name} - Library")
                 browser.set_breadcrumb("Library")
             except Exception:
                 pass
@@ -356,6 +362,7 @@ class MusicPlayerApp(App):
     def check_action(self, action: str, parameters: tuple) -> bool | None:
         """Disable certain app bindings when specific widgets are focused."""
         from .widgets.equalizer import EQBand
+
         focused = self.focused
 
         if action == "go_back":
@@ -363,7 +370,12 @@ class MusicPlayerApp(App):
                 return None
 
         # Disable seek bindings when EQ band is focused (left/right navigate bands)
-        if action in ("seek_forward", "seek_backward", "seek_forward_long", "seek_backward_long"):
+        if action in (
+            "seek_forward",
+            "seek_backward",
+            "seek_forward_long",
+            "seek_backward_long",
+        ):
             if focused and isinstance(focused, EQBand):
                 return None
 
@@ -371,7 +383,9 @@ class MusicPlayerApp(App):
 
     # ─── Playback Actions ────────────────────────────────────────
 
-    def _play_song(self, song: Song, queue_songs: Optional[list[Song]] = None, start_index: int = 0):
+    def _play_song(
+        self, song: Song, queue_songs: Optional[list[Song]] = None, start_index: int = 0
+    ):
         """Play a song and optionally set up the queue."""
         if not self.client:
             self._show_status("No server connected")
@@ -431,10 +445,11 @@ class MusicPlayerApp(App):
 
     def _on_track_end(self):
         """Called when the current track finishes."""
-        # Scrobble
-        if self.client and self.player.current_song:
+        # Scrobble (only if not already scrobbled at 50%)
+        if self.client and self.player.current_song and not self._scrobble_reported:
             try:
                 self.client.scrobble(self.player.current_song.id)
+                self._scrobble_reported = True
             except Exception:
                 pass
 
@@ -452,11 +467,7 @@ class MusicPlayerApp(App):
             self.call_from_thread(np.update_position, position, duration)
 
             # Scrobble at 50% or 4 minutes
-            if (
-                not self._scrobble_reported
-                and self.player.current_song
-                and self.client
-            ):
+            if not self._scrobble_reported and self.player.current_song and self.client:
                 if (duration > 0 and position / duration > 0.5) or position > 240:
                     self._scrobble_reported = True
                     try:
@@ -506,6 +517,10 @@ class MusicPlayerApp(App):
             pass
         self._nav_history.append({"type": view_type, "tab": active_tab, **kwargs})
 
+        # Limit history size to prevent unbounded memory growth
+        if len(self._nav_history) > self._max_nav_history:
+            self._nav_history.pop(0)  # Remove oldest entry
+
     def _pop_nav(self) -> Optional[dict]:
         """Pop the last view from the navigation stack."""
         if self._nav_history:
@@ -530,7 +545,12 @@ class MusicPlayerApp(App):
             if artist and self.client:
                 self._browse_artist(artist)
 
-        elif table.id in ("song-table-main", "album-songs", "starred-songs", "history-songs"):
+        elif table.id in (
+            "song-table-main",
+            "album-songs",
+            "starred-songs",
+            "history-songs",
+        ):
             if table.id == "song-table-main":
                 song_table = self.query_one("#song-table-main", SongTable)
             elif table.id == "starred-songs":
@@ -559,11 +579,9 @@ class MusicPlayerApp(App):
         elif table.id == "queue-table":
             qv = self.query_one("#queue-view", QueueView)
             idx = qv.get_selected_index()
-            if idx >= 0 and idx < self.queue_mgr.length:
-                self.queue_mgr._current_index = idx
-                song = self.queue_mgr.current_song
-                if song:
-                    self._play_song(song)
+            song = self.queue_mgr.jump_to(idx)
+            if song:
+                self._play_song(song)
 
     # ─── Browse Drill-Down ───────────────────────────────────────
 
@@ -758,9 +776,7 @@ class MusicPlayerApp(App):
         self.config.shuffle = self.queue_mgr.shuffle
         self.config.save()
         self._update_queue_display()
-        self._show_status(
-            f"Shuffle {'ON' if self.queue_mgr.shuffle else 'OFF'}"
-        )
+        self._show_status(f"Shuffle {'ON' if self.queue_mgr.shuffle else 'OFF'}")
 
     def action_cycle_repeat(self) -> None:
         mode = self.queue_mgr.cycle_repeat()
@@ -1033,9 +1049,7 @@ class MusicPlayerApp(App):
                     np.server_name = self.config.active_server.name
                 self.call_later(self._reload_app)
 
-        self.push_screen(
-            ServerManagerModal(self.config), on_server_result
-        )
+        self.push_screen(ServerManagerModal(self.config), on_server_result)
 
     async def _reload_app(self):
         """Reload the app after server change."""

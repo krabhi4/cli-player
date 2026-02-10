@@ -1,14 +1,13 @@
 """Configuration and credential management for CLI Music Player."""
 
+import base64
+import hashlib
 import json
 import os
-import hashlib
-import base64
 import secrets
-from dataclasses import dataclass, field, asdict
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Optional
-
 
 CONFIG_DIR = Path.home() / ".config" / "cli-music-player"
 CONFIG_FILE = CONFIG_DIR / "config.json"
@@ -121,12 +120,22 @@ def encrypt_password(password: str) -> str:
 
 
 def decrypt_password(encrypted: str) -> str:
-    """Decrypt a stored password."""
-    from cryptography.fernet import Fernet
+    """Decrypt a stored password.
+
+    Raises:
+        ValueError: If the encrypted password cannot be decrypted (e.g., wrong key/machine).
+    """
+    from cryptography.fernet import Fernet, InvalidToken
 
     key = base64.urlsafe_b64encode(_derive_key())
     f = Fernet(key)
-    return f.decrypt(encrypted.encode()).decode()
+    try:
+        return f.decrypt(encrypted.encode()).decode()
+    except InvalidToken as e:
+        raise ValueError(
+            "Cannot decrypt password. This may happen if the password was "
+            "encrypted on a different machine. Please re-enter your password."
+        ) from e
 
 
 class AppConfig:
@@ -154,9 +163,7 @@ class AppConfig:
         try:
             with open(CONFIG_FILE) as f:
                 data = json.load(f)
-            self.servers = [
-                ServerConfig.from_dict(s) for s in data.get("servers", [])
-            ]
+            self.servers = [ServerConfig.from_dict(s) for s in data.get("servers", [])]
             self.active_server_index = data.get("active_server_index", -1)
             self.active_eq_preset = data.get("active_eq_preset", "Flat")
             self.custom_eq_gains = data.get("custom_eq_gains", [0.0] * 18)
@@ -234,11 +241,22 @@ class AppConfig:
             self.save()
 
     def get_password(self, server: Optional[ServerConfig] = None) -> str:
-        """Get decrypted password for a server."""
+        """Get decrypted password for a server.
+
+        Returns:
+            The decrypted password, or empty string if decryption fails.
+        """
         if server is None:
             server = self.active_server
         if server and server._encrypted_password:
-            return decrypt_password(server._encrypted_password)
+            try:
+                return decrypt_password(server._encrypted_password)
+            except ValueError:
+                # Password cannot be decrypted (e.g., encrypted on different machine)
+                # Clear the invalid password and return empty string
+                server._encrypted_password = ""
+                self.save()
+                return ""
         return ""
 
     def update_server_password(self, index: int, password: str):

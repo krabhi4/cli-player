@@ -8,7 +8,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Button, Input, Label, Select, Static
 
-from ..equalizer import Equalizer, EQ_BAND_LABELS, GAIN_MIN, GAIN_MAX
+from ..equalizer import EQ_BAND_LABELS, GAIN_MAX, GAIN_MIN, Equalizer
 
 
 class EQBandChanged(Message):
@@ -96,7 +96,7 @@ class EQBand(Widget):
         if h <= 2:
             return
 
-        slider_start = 1   # after value line
+        slider_start = 1  # after value line
         slider_end = h - 1  # before label line
         slider_h = slider_end - slider_start
         if slider_h <= 0:
@@ -109,7 +109,13 @@ class EQBand(Widget):
             new_gain = max(GAIN_MIN, self.gain - 1.0)
         else:
             click_y = y - slider_start
-            ratio = 1.0 - (click_y / max(slider_h - 1, 1))
+            # Clamp click_y to valid range to prevent edge cases
+            click_y = max(0, min(slider_h - 1, click_y))
+            # Avoid division by zero or negative denominator
+            if slider_h <= 1:
+                ratio = 0.5
+            else:
+                ratio = 1.0 - (click_y / (slider_h - 1))
             new_gain = GAIN_MIN + ratio * (GAIN_MAX - GAIN_MIN)
             new_gain = max(GAIN_MIN, min(GAIN_MAX, round(new_gain)))
 
@@ -147,7 +153,9 @@ class EQBand(Widget):
             event.prevent_default()
             if self.band_index > 0:
                 try:
-                    prev_band = self.screen.query_one(f"#eq-band-{self.band_index - 1}", EQBand)
+                    prev_band = self.screen.query_one(
+                        f"#eq-band-{self.band_index - 1}", EQBand
+                    )
                     prev_band.focus()
                 except Exception:
                     pass
@@ -156,7 +164,9 @@ class EQBand(Widget):
             event.prevent_default()
             if self.band_index < 17:
                 try:
-                    next_band = self.screen.query_one(f"#eq-band-{self.band_index + 1}", EQBand)
+                    next_band = self.screen.query_one(
+                        f"#eq-band-{self.band_index + 1}", EQBand
+                    )
                     next_band.focus()
                 except Exception:
                     pass
@@ -241,7 +251,10 @@ class EqualizerWidget(Widget):
         self.equalizer = equalizer
 
     def compose(self) -> ComposeResult:
-        yield Static("Equalizer  [e: close | ←/→: bands | ↑/↓: adjust | click: set]", classes="eq-header")
+        yield Static(
+            "Equalizer  [e: close | ←/→: bands | ↑/↓: adjust | click: set]",
+            classes="eq-header",
+        )
         with Horizontal(classes="eq-controls"):
             presets = [(p.name, p.name) for p in self.equalizer.get_presets()]
             yield Static("Preset: ", classes="eq-preset-label")
