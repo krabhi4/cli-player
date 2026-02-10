@@ -25,19 +25,52 @@ HELP_TEXT = """\
 [bold]Queue & Modes[/bold]
   [green]z[/green]           Toggle Shuffle
   [green]r[/green]           Cycle Repeat (Off → All → One)
-  [green]a[/green]           Add to Queue
+  [green]a[/green]           Add highlighted song to Queue
+  [green]d / Delete[/green]  Remove from Queue
+  [green]Shift+↑/↓[/green]  Reorder Queue
   [green]c[/green]           Clear Queue
 
+[bold]Playlist[/bold]
+  [green]P[/green]           Save Queue as Playlist (name dialog)
+                  Add songs to queue first, then press Shift+P
+
 [bold]Navigation[/bold]
-  [green]1-5[/green]         Switch tabs
-  [green]Tab[/green]         Switch focus
+  [green]1-6[/green]         Switch tabs:
+                  1=Albums  2=Artists  3=Songs
+                  4=Playlists  5=Genres  6=Starred
+  [green]7[/green]           Play History (songs played this session)
+  [green]Esc / Bksp[/green] Go back (previous view)
+  [green]Tab[/green]         Switch focus between panels
+
+[bold]Album Sorting[/bold]
+  [green]o[/green]           Cycle album sort order:
+                  Newest → Random → Frequent →
+                  Recent → Starred → A-Z
+
+[bold]Starring[/bold]
+  [green]f[/green]           Star / Unstar the highlighted song
+                  (or the playing song if no table active)
+                  View starred songs in tab 6
+
+[bold]Equalizer[/bold]
+  [green]e[/green]           Open / Close Equalizer
+                  When open, first band auto-focuses:
+                  [green]←/→[/green]  Switch between bands
+                  [green]↑/↓[/green]  Adjust gain ±1 dB
+                  [green]Click[/green] Set gain by position
+                  [green]Esc[/green]  Close equalizer
+                  Use preset dropdown and Reset/On-Off buttons
 
 [bold]Features[/bold]
-  [green]/[/green]           Search
-  [green]e[/green]           Toggle Equalizer
-  [green]f[/green]           Star / Unstar
-  [green]S[/green]           Server Manager
+  [green]/[/green]           Search (songs, albums, artists)
+  [green]l[/green]           Toggle Lyrics panel
+  [green]R[/green]           Artist Radio (queue similar songs)
+  [green]S[/green]           Server Manager (add/switch servers)
   [green]?[/green] or [green]i[/green]       This Help
+
+[bold]Artist Drill-Down[/bold]
+  Click an artist → see their Top Songs + Albums
+  Press [green]Esc[/green] to go back to the full library
 
 [bold]General[/bold]
   [green]q / Ctrl+C[/green]  Quit

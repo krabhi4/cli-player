@@ -286,6 +286,34 @@ ProgressBar Bar > .bar--complete {
     margin: 1 0;
 }
 
+/* ─── Lyrics Panel ─────────────────────────────────────── */
+
+LyricsPanel {
+    width: 1fr;
+    height: 1fr;
+    background: #24283b;
+    border: solid #7aa2f7;
+    display: none;
+}
+
+LyricsPanel.visible {
+    display: block;
+}
+
+LyricsPanel .lyrics-header {
+    height: 1;
+    background: #7aa2f7;
+    color: #1a1b26;
+    text-style: bold;
+    text-align: center;
+    padding: 0 1;
+}
+
+LyricsPanel .lyrics-text {
+    padding: 1 2;
+    color: #c0caf5;
+}
+
 /* ─── Loading ───────────────────────────────────────────── */
 
 #loading {

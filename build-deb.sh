@@ -7,7 +7,7 @@
 set -euo pipefail
 
 APP_NAME="cli-music-player"
-VERSION="1.5.0"
+VERSION="2.0.0"
 ARCH=$(dpkg --print-architecture 2>/dev/null || echo "amd64")
 INSTALL_DIR="/opt/${APP_NAME}"
 PKG_DIR="$(mktemp -d)"
@@ -43,7 +43,7 @@ if [ "$1" = "--setup" ]; then
     python3 -m venv "${VENV_DIR}"
     source "${VENV_DIR}/bin/activate"
     pip install --upgrade pip > /dev/null 2>&1
-    pip install "${INSTALL_DIR}" > /dev/null 2>&1
+    pip install --force-reinstall --no-cache-dir "${INSTALL_DIR}" > /dev/null 2>&1
     echo "✓ Setup complete! Run 'music-player' to start."
     exit 0
 fi
@@ -86,7 +86,7 @@ python3 -m venv "${VENV_DIR}"
 # Install the package
 source "${VENV_DIR}/bin/activate"
 pip install --upgrade pip > /dev/null 2>&1
-pip install "${INSTALL_DIR}" > /dev/null 2>&1
+pip install --force-reinstall --no-cache-dir "${INSTALL_DIR}" > /dev/null 2>&1
 deactivate
 
 echo ""

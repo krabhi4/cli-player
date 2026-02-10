@@ -1,4 +1,4 @@
-# 🎵 CLI Music Player for Navidrome
+# CLI Music Player for Navidrome
 
 [![GitHub release](https://img.shields.io/github/v/release/krabhi4/cli-player)](https://github.com/krabhi4/cli-player/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -9,12 +9,16 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 ## Features
 
 - **Multi-server support** — Connect to multiple Navidrome instances, switch on the fly
-- **Full library browsing** — Artists, Albums, Songs, Playlists, Genres
+- **Full library browsing** — Artists, Albums, Songs, Playlists, Genres, Starred/Favourites
 - **Live search** — Search across your entire library
 - **Playback controls** — Play, Pause, Next, Prev, Seek, Volume
-- **Queue management** — Add, remove, reorder, save as playlist
+- **Queue management** — Add, remove (`d`/`Delete`), reorder (`Shift+Up/Down`), save as playlist (`P`)
 - **Shuffle & Repeat** — Shuffle mode, Repeat All / Repeat One
-- **18-band Equalizer** — 10 built-in presets + custom presets
+- **18-band Equalizer** — 10 built-in presets + custom presets, interactive band adjustment (click or keyboard)
+- **Lyrics display** — Toggle lyrics panel with `l`
+- **Artist Radio** — Discover similar songs with `R`
+- **Album sorting** — Cycle sort modes with `o` (Newest/Random/Frequent/Recent/Starred/A-Z)
+- **Back navigation** — `Escape`/`Backspace` to go back when drilling into albums/artists/genres
 - **Scrobbling** — Automatic play count reporting
 - **Star/Favourite** — Star songs from the player
 - **Beautiful TUI** — Tokyo Night-themed interface with Textual
@@ -35,7 +39,7 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 # https://github.com/krabhi4/cli-player/releases
 
 # Install it
-sudo dpkg -i cli-music-player_1.5.0_amd64.deb
+sudo dpkg -i cli-music-player_2.0.0_amd64.deb
 
 # Run from anywhere
 music-player
@@ -58,7 +62,7 @@ sudo dpkg -r cli-music-player
 git clone https://github.com/krabhi4/cli-player.git
 cd cli-player
 ./build-deb.sh
-sudo dpkg -i cli-music-player_1.5.0_amd64.deb
+sudo dpkg -i cli-music-player_2.0.0_amd64.deb
 ```
 
 ### Option 3: Run from source (development)
@@ -86,12 +90,19 @@ python3 -m cli_music_player
 | `z` | Toggle Shuffle |
 | `r` | Cycle Repeat (Off → All → One) |
 | `a` | Add selected song to queue |
+| `d / Delete` | Remove selected song from queue |
+| `Shift+↑ / ↓` | Reorder queue items |
 | `c` | Clear queue |
+| `P` | Save queue as playlist |
 | `/` | Search |
 | `e` | Toggle Equalizer |
+| `l` | Toggle Lyrics |
 | `f` | Star/Unstar current song |
+| `R` | Artist Radio (similar songs) |
+| `o` | Cycle album sort mode |
 | `S` | Server Manager |
-| `1-5` | Switch tabs (Albums/Artists/Songs/Playlists/Genres) |
+| `1-6` | Switch tabs (Albums/Artists/Songs/Playlists/Genres/Starred) |
+| `Esc / Backspace` | Go back (navigation history) |
 | `?` | Help |
 | `q` | Quit |
 
@@ -111,6 +122,20 @@ Config is stored at `~/.config/cli-music-player/config.json` and includes:
 - Shuffle/repeat preferences
 - Custom EQ presets
 - Audio device setting
+
+## What's New in 2.0.0
+
+- **Starred/Favourites tab** — Browse your starred songs (tab `6`)
+- **Queue management** — Remove (`d`/`Delete`) and reorder (`Shift+Up/Down`) queue items
+- **Back navigation** — `Escape`/`Backspace` to navigate back through browsing history
+- **Loading indicators** — Status bar shows loading feedback during library/search operations
+- **Lyrics display** — Toggle lyrics panel with `l` (uses Subsonic getLyrics API)
+- **Interactive equalizer** — Click or use arrow keys to adjust EQ bands, save custom presets
+- **Artist Radio** — `R` to queue similar songs based on the currently playing track
+- **Album sorting** — `o` to cycle through sort modes (Newest/Random/Frequent/Recent/Starred/A-Z)
+- **Save queue as playlist** — `P` to save the current queue as a server-side playlist
+- **Responsive queue** — Queue title truncation adapts to widget width
+- **Better error feedback** — Errors surfaced to status bar instead of silently swallowed
 
 ## Contributing
 
