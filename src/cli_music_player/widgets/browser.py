@@ -1,21 +1,16 @@
 """Library browser widget — browse artists, albums, songs, genres, playlists."""
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, Horizontal
 from textual.message import Message
 from textual.widget import Widget
 from textual.widgets import (
     DataTable,
-    Label,
     Static,
     TabbedContent,
     TabPane,
-    Button,
-    ListView,
-    ListItem,
 )
 
-from ..subsonic import Song, Album, Artist, Playlist, Genre
+from ..subsonic import Album, Artist, Genre, Playlist, Song
 from ..utils import format_duration
 
 

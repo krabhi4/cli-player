@@ -1,20 +1,16 @@
 """Main Textual Application — orchestrates all components."""
 
-import threading
-from pathlib import Path
-from typing import Optional
+import contextlib
+from typing import ClassVar
 
 from textual.app import App, ComposeResult
-from textual.binding import Binding
+from textual.binding import Binding, BindingType
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     DataTable,
-    Footer,
-    Header,
     Input,
-    Label,
     Select,
     Static,
     TabbedContent,
@@ -31,22 +27,19 @@ from .subsonic import (
     Playlist,
     Song,
     SubsonicClient,
-    SubsonicError,
 )
 from .widgets.browser import (
-    AddToQueue,
     AlbumList,
     ArtistList,
     GenreList,
     LibraryBrowser,
     PlaylistList,
-    SongSelected,
     SongTable,
 )
-from .widgets.equalizer import EqualizerWidget
+from .widgets.equalizer import EQBand, EqualizerWidget
 from .widgets.help import HelpModal
 from .widgets.lyrics import LyricsPanel
-from .widgets.now_playing import ControlBtn, NowPlaying, SeekBar
+from .widgets.now_playing import NowPlaying
 from .widgets.queue_view import QueueView
 from .widgets.search import SearchModal
 from .widgets.server_mgr import ServerManagerModal
@@ -96,7 +89,7 @@ class SavePlaylistModal(ModalScreen[str]):
     }
     """
 
-    BINDINGS = [("escape", "cancel", "Cancel")]
+    BINDINGS: ClassVar[list[BindingType]] = [("escape", "cancel", "Cancel")]
 
     def __init__(self, default_name: str = ""):
         super().__init__()
@@ -142,7 +135,7 @@ class MusicPlayerApp(App):
 
     CSS_PATH = "styles/app.tcss"
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[BindingType]] = [  # type: ignore[assignment]
         Binding("space", "toggle_pause", "Play/Pause", show=True, priority=True),
         Binding("n", "next_track", "Next", show=True),
         Binding("p", "prev_track", "Prev", show=True),
@@ -192,7 +185,7 @@ class MusicPlayerApp(App):
         self.player = Player(audio_device=self.config.audio_device)
         self.equalizer = Equalizer(self.config)
         self.queue_mgr = QueueManager()
-        self.client: Optional[SubsonicClient] = None
+        self.client: SubsonicClient | None = None
 
         # Restore saved state
         self.player.volume = self.config.volume
@@ -232,14 +225,13 @@ class MusicPlayerApp(App):
             with Vertical(id="content-area"):
                 if self.config.active_server is None:
                     # Welcome screen — no server configured
-                    with Vertical(id="welcome"):
-                        with Vertical(id="welcome-box"):
-                            yield Static("CLI Music Player", classes="welcome-title")
-                            yield Static(
-                                "\nNo servers configured yet.\n"
-                                "Press [bold]S[/bold] to add a Navidrome server.\n",
-                                classes="welcome-text",
-                            )
+                    with Vertical(id="welcome"), Vertical(id="welcome-box"):
+                        yield Static("CLI Music Player", classes="welcome-title")
+                        yield Static(
+                            "\nNo servers configured yet.\n"
+                            "Press [bold]S[/bold] to add a Navidrome server.\n",
+                            classes="welcome-text",
+                        )
                 else:
                     yield LibraryBrowser(id="library-browser")
                 yield EqualizerWidget(self.equalizer, id="eq-widget")
@@ -247,7 +239,7 @@ class MusicPlayerApp(App):
             yield QueueView(id="queue-view")
         yield NowPlaying(id="now-playing")
         yield Static(
-            "v2.0.0 | ? Help | Space Play/Pause | n Next | p Prev | / Search | o Sort | P Save Playlist | S Servers | q Quit",
+            "v2.0.2 | ? Help | Space Play/Pause | n Next | p Prev | / Search | o Sort | P Save Playlist | S Servers | q Quit",
             id="status-bar",
         )
 
@@ -272,7 +264,7 @@ class MusicPlayerApp(App):
             password = self.config.get_password(server)
             self.client = SubsonicClient(server.url, server.username, password)
 
-    async def _load_library(self, restore_tab: str = ""):
+    async def _load_library(self, restore_tab: str = ""):  # noqa: PLR0915
         """Load initial library data. Optionally restore a specific tab."""
         if not self.client:
             return
@@ -335,7 +327,8 @@ class MusicPlayerApp(App):
             # Update browser header
             try:
                 browser = self.query_one("#library-browser", LibraryBrowser)
-                browser.set_header(f"{self.config.active_server.name} - Library")
+                server = self.config.active_server
+                browser.set_header(f"{server.name} - Library" if server else "Library")
                 browser.set_breadcrumb("Library")
             except Exception:
                 pass
@@ -361,31 +354,30 @@ class MusicPlayerApp(App):
 
     def check_action(self, action: str, parameters: tuple) -> bool | None:
         """Disable certain app bindings when specific widgets are focused."""
-        from .widgets.equalizer import EQBand
-
         focused = self.focused
 
-        if action == "go_back":
-            if focused and isinstance(focused, (Input, Select, EQBand)):
-                return None
+        if action == "go_back" and focused and isinstance(focused, (Input, Select, EQBand)):
+            return None
 
         # Disable seek bindings when EQ band is focused (left/right navigate bands)
-        if action in (
-            "seek_forward",
-            "seek_backward",
-            "seek_forward_long",
-            "seek_backward_long",
+        if (
+            action
+            in (
+                "seek_forward",
+                "seek_backward",
+                "seek_forward_long",
+                "seek_backward_long",
+            )
+            and focused
+            and isinstance(focused, EQBand)
         ):
-            if focused and isinstance(focused, EQBand):
-                return None
+            return None
 
         return True
 
     # ─── Playback Actions ────────────────────────────────────────
 
-    def _play_song(
-        self, song: Song, queue_songs: Optional[list[Song]] = None, start_index: int = 0
-    ):
+    def _play_song(self, song: Song, queue_songs: list[Song] | None = None, start_index: int = 0):
         """Play a song and optionally set up the queue."""
         if not self.client:
             self._show_status("No server connected")
@@ -417,10 +409,8 @@ class MusicPlayerApp(App):
         np.state = "playing"
 
         # Report now playing
-        try:
+        with contextlib.suppress(Exception):
             self.client.now_playing(song.id)
-        except Exception:
-            pass
 
         # Update queue view
         self._update_queue_display()
@@ -467,13 +457,15 @@ class MusicPlayerApp(App):
             self.call_from_thread(np.update_position, position, duration)
 
             # Scrobble at 50% or 4 minutes
-            if not self._scrobble_reported and self.player.current_song and self.client:
-                if (duration > 0 and position / duration > 0.5) or position > 240:
-                    self._scrobble_reported = True
-                    try:
-                        self.client.scrobble(self.player.current_song.id)
-                    except Exception:
-                        pass
+            if (
+                not self._scrobble_reported
+                and self.player.current_song
+                and self.client
+                and ((duration > 0 and position / duration > 0.5) or position > 240)
+            ):
+                self._scrobble_reported = True
+                with contextlib.suppress(Exception):
+                    self.client.scrobble(self.player.current_song.id)
         except Exception:
             pass
 
@@ -521,7 +513,7 @@ class MusicPlayerApp(App):
         if len(self._nav_history) > self._max_nav_history:
             self._nav_history.pop(0)  # Remove oldest entry
 
-    def _pop_nav(self) -> Optional[dict]:
+    def _pop_nav(self) -> dict | None:
         """Pop the last view from the navigation stack."""
         if self._nav_history:
             return self._nav_history.pop()
@@ -529,7 +521,7 @@ class MusicPlayerApp(App):
 
     # ─── DataTable Row Selection ─────────────────────────────────
 
-    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+    def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:  # noqa: PLR0912
         """Handle row selection in data tables."""
         table = event.data_table
 
@@ -992,7 +984,7 @@ class MusicPlayerApp(App):
             default_name = f"Queue ({self.queue_mgr.length} songs)"
 
         def on_result(name):
-            if name is None:
+            if name is None or not self.client:
                 return
             song_ids = [s.id for s in self.queue_mgr.queue]
             try:

@@ -11,7 +11,11 @@ __pycache__/
 
 # Virtual environment
 venv/
+.venv/
 
 # IDE
 .vscode/
 .idea/
+
+# Claude
+CLAUDE.md

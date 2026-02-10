@@ -1,12 +1,14 @@
 """Now Playing bar widget — shows current track info, progress, controls."""
 
+import contextlib
+
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal
 from textual.events import Click
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Label, ProgressBar, Static
+from textual.widgets import Static
 
 from ..utils import format_duration
 
@@ -36,6 +38,7 @@ class SeekBar(Widget):
 
     class Seeked(Message):
         """Emitted when the user clicks the seek bar."""
+
         def __init__(self, position: float) -> None:
             super().__init__()
             self.position = position
@@ -92,6 +95,7 @@ class ControlBtn(Widget):
 
     class Pressed(Message):
         """Posted when the control button is clicked."""
+
         def __init__(self, action: str) -> None:
             super().__init__()
             self.action = action
@@ -251,7 +255,7 @@ class NowPlaying(Widget):
             yield Static(" │ ", classes="ctrl-sep")
             yield ControlBtn("🔀", "toggle_shuffle", id="btn-shuffle")
             yield ControlBtn("🎛", "toggle_eq", id="btn-eq")
-            yield ControlBtn("ℹ", "show_help", id="btn-info")
+            yield ControlBtn("\u2139", "show_help", id="btn-info")
             yield Static("", classes="np-spacer")
             yield Static("🔊 75%", id="np-volume", classes="np-volume")
         # Row 4: Modes + server (server name is clickable)
@@ -273,10 +277,8 @@ class NowPlaying(Widget):
     # ─── Watchers ────────────────────────────────────────
 
     def watch_song_title(self, value: str) -> None:
-        try:
+        with contextlib.suppress(Exception):
             self.query_one("#np-title", Static).update(value)
-        except Exception:
-            pass
 
     def watch_song_artist(self, value: str) -> None:
         try:
@@ -302,9 +304,7 @@ class NowPlaying(Widget):
             else:
                 seekbar.progress = 0
             time_w = self.query_one("#np-time", Static)
-            time_w.update(
-                f"{format_duration(int(value))} / {format_duration(int(self.duration))}"
-            )
+            time_w.update(f"{format_duration(int(value))} / {format_duration(int(self.duration))}")
         except Exception:
             pass
 
@@ -375,7 +375,7 @@ class NowPlaying(Widget):
 
     def on_seek_bar_seeked(self, event: SeekBar.Seeked) -> None:
         """Handle seek bar click."""
-        self.app.action_seek_to(event.position)
+        self.app.action_seek_to(event.position)  # type: ignore[attr-defined]
 
     # ─── Public API ──────────────────────────────────────
 

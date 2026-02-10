@@ -4,10 +4,8 @@ import base64
 import hashlib
 import json
 import os
-import secrets
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 CONFIG_DIR = Path.home() / ".config" / "cli-music-player"
 CONFIG_FILE = CONFIG_DIR / "config.json"
@@ -112,7 +110,7 @@ def _derive_key() -> bytes:
 
 def encrypt_password(password: str) -> str:
     """Encrypt a password for storage."""
-    from cryptography.fernet import Fernet
+    from cryptography.fernet import Fernet  # noqa: PLC0415
 
     key = base64.urlsafe_b64encode(_derive_key())
     f = Fernet(key)
@@ -125,7 +123,7 @@ def decrypt_password(encrypted: str) -> str:
     Raises:
         ValueError: If the encrypted password cannot be decrypted (e.g., wrong key/machine).
     """
-    from cryptography.fernet import Fernet, InvalidToken
+    from cryptography.fernet import Fernet, InvalidToken  # noqa: PLC0415
 
     key = base64.urlsafe_b64encode(_derive_key())
     f = Fernet(key)
@@ -161,7 +159,7 @@ class AppConfig:
         if not CONFIG_FILE.exists():
             return
         try:
-            with open(CONFIG_FILE) as f:
+            with CONFIG_FILE.open() as f:
                 data = json.load(f)
             self.servers = [ServerConfig.from_dict(s) for s in data.get("servers", [])]
             self.active_server_index = data.get("active_server_index", -1)
@@ -176,20 +174,16 @@ class AppConfig:
             custom_presets = data.get("custom_eq_presets", [])
             default_names = {p.name for p in DEFAULT_EQ_PRESETS}
             self.eq_presets = list(DEFAULT_EQ_PRESETS) + [
-                EQPreset.from_dict(p)
-                for p in custom_presets
-                if p["name"] not in default_names
+                EQPreset.from_dict(p) for p in custom_presets if p["name"] not in default_names
             ]
-        except (json.JSONDecodeError, KeyError) as e:
+        except (json.JSONDecodeError, KeyError):
             pass  # Use defaults on corrupt config
 
     def save(self):
         """Save configuration to disk."""
         self._ensure_dir()
         default_names = {p.name for p in DEFAULT_EQ_PRESETS}
-        custom_presets = [
-            p.to_dict() for p in self.eq_presets if p.name not in default_names
-        ]
+        custom_presets = [p.to_dict() for p in self.eq_presets if p.name not in default_names]
         data = {
             "servers": [s.to_dict() for s in self.servers],
             "active_server_index": self.active_server_index,
@@ -201,18 +195,16 @@ class AppConfig:
             "repeat_mode": self.repeat_mode,
             "audio_device": self.audio_device,
         }
-        with open(CONFIG_FILE, "w") as f:
+        with CONFIG_FILE.open("w") as f:
             json.dump(data, f, indent=2)
 
     @property
-    def active_server(self) -> Optional[ServerConfig]:
+    def active_server(self) -> ServerConfig | None:
         if 0 <= self.active_server_index < len(self.servers):
             return self.servers[self.active_server_index]
         return None
 
-    def add_server(
-        self, name: str, url: str, username: str, password: str
-    ) -> ServerConfig:
+    def add_server(self, name: str, url: str, username: str, password: str) -> ServerConfig:
         """Add a new server configuration."""
         server = ServerConfig(
             name=name,
@@ -221,8 +213,7 @@ class AppConfig:
             _encrypted_password=encrypt_password(password),
         )
         self.servers.append(server)
-        if self.active_server_index < 0:
-            self.active_server_index = 0
+        self.active_server_index = max(self.active_server_index, 0)
         self.save()
         return server
 
@@ -240,7 +231,7 @@ class AppConfig:
             self.active_server_index = index
             self.save()
 
-    def get_password(self, server: Optional[ServerConfig] = None) -> str:
+    def get_password(self, server: ServerConfig | None = None) -> str:
         """Get decrypted password for a server.
 
         Returns:
@@ -265,7 +256,7 @@ class AppConfig:
             self.servers[index]._encrypted_password = encrypt_password(password)
             self.save()
 
-    def get_eq_preset(self, name: str) -> Optional[EQPreset]:
+    def get_eq_preset(self, name: str) -> EQPreset | None:
         """Get an EQ preset by name."""
         for p in self.eq_presets:
             if p.name == name:

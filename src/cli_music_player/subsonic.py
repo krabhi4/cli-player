@@ -2,8 +2,8 @@
 
 import hashlib
 import secrets
-from dataclasses import dataclass, field
-from typing import Any, Optional
+from dataclasses import dataclass
+from typing import Any
 
 import requests
 
@@ -149,8 +149,6 @@ class SubsonicError(Exception):
 class ConnectionError(Exception):
     """Cannot connect to the Navidrome server."""
 
-    pass
-
 
 class SubsonicClient:
     """Client for the Subsonic REST API used by Navidrome."""
@@ -160,7 +158,7 @@ class SubsonicClient:
         self.username = username
         self.password = password
         self.session = requests.Session()
-        self.session.timeout = 15
+        self._timeout = 15
 
     def close(self):
         """Close the HTTP session and release resources."""
@@ -192,14 +190,10 @@ class SubsonicClient:
 
         try:
             # Explicitly pass timeout to enforce it on this request
-            resp = self.session.get(
-                url, params=all_params, timeout=self.session.timeout
-            )
+            resp = self.session.get(url, params=all_params, timeout=self._timeout)
             resp.raise_for_status()
         except requests.exceptions.Timeout as e:
-            raise ConnectionError(
-                f"Request timed out after {self.session.timeout}s: {e}"
-            ) from e
+            raise ConnectionError(f"Request timed out after {self._timeout}s: {e}") from e
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(f"Cannot connect to {self.base_url}: {e}") from e
         except requests.exceptions.RequestException as e:
@@ -210,9 +204,7 @@ class SubsonicClient:
 
         if sub_response.get("status") == "failed":
             error = sub_response.get("error", {})
-            raise SubsonicError(
-                error.get("code", -1), error.get("message", "Unknown error")
-            )
+            raise SubsonicError(error.get("code", -1), error.get("message", "Unknown error"))
 
         return sub_response
 
@@ -335,9 +327,7 @@ class SubsonicClient:
         genres_data = resp.get("genres", {})
         return [Genre.from_api(g) for g in genres_data.get("genre", [])]
 
-    def get_songs_by_genre(
-        self, genre: str, count: int = 50, offset: int = 0
-    ) -> list[Song]:
+    def get_songs_by_genre(self, genre: str, count: int = 50, offset: int = 0) -> list[Song]:
         """Get songs by genre."""
         resp = self._request(
             "getSongsByGenre.view",
@@ -367,7 +357,7 @@ class SubsonicClient:
     def create_playlist(
         self,
         name: str,
-        song_ids: Optional[list[str]] = None,
+        song_ids: list[str] | None = None,
     ) -> str:
         """Create a new playlist. Returns playlist ID."""
         params: dict[str, Any] = {"name": name}

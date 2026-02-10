@@ -1,12 +1,12 @@
 """Equalizer UI widget — visual EQ with interactive sliders and preset selector."""
 
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Horizontal
 from textual.events import Click
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Button, Input, Label, Select, Static
+from textual.widgets import Button, Input, Select, Static
 
 from ..equalizer import EQ_BAND_LABELS, GAIN_MAX, GAIN_MIN, Equalizer
 
@@ -112,10 +112,7 @@ class EQBand(Widget):
             # Clamp click_y to valid range to prevent edge cases
             click_y = max(0, min(slider_h - 1, click_y))
             # Avoid division by zero or negative denominator
-            if slider_h <= 1:
-                ratio = 0.5
-            else:
-                ratio = 1.0 - (click_y / (slider_h - 1))
+            ratio = 0.5 if slider_h <= 1 else 1.0 - click_y / (slider_h - 1)
             new_gain = GAIN_MIN + ratio * (GAIN_MAX - GAIN_MIN)
             new_gain = max(GAIN_MIN, min(GAIN_MAX, round(new_gain)))
 
@@ -153,9 +150,7 @@ class EQBand(Widget):
             event.prevent_default()
             if self.band_index > 0:
                 try:
-                    prev_band = self.screen.query_one(
-                        f"#eq-band-{self.band_index - 1}", EQBand
-                    )
+                    prev_band = self.screen.query_one(f"#eq-band-{self.band_index - 1}", EQBand)
                     prev_band.focus()
                 except Exception:
                     pass
@@ -164,9 +159,7 @@ class EQBand(Widget):
             event.prevent_default()
             if self.band_index < 17:
                 try:
-                    next_band = self.screen.query_one(
-                        f"#eq-band-{self.band_index + 1}", EQBand
-                    )
+                    next_band = self.screen.query_one(f"#eq-band-{self.band_index + 1}", EQBand)
                     next_band.focus()
                 except Exception:
                     pass

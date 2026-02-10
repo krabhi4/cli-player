@@ -3,7 +3,7 @@
 from textual.app import ComposeResult
 from textual.message import Message
 from textual.widget import Widget
-from textual.widgets import DataTable, Label, Static
+from textual.widgets import DataTable, Static
 
 from ..subsonic import Song
 from ..utils import format_duration
@@ -118,9 +118,7 @@ class QueueView(Widget):
 
         info = self.query_one("#queue-info", Static)
         total = sum(s.duration for s in songs)
-        info.update(
-            f"{len(songs)} songs | {format_duration(total)}"
-        )
+        info.update(f"{len(songs)} songs | {format_duration(total)}")
 
     def get_selected_index(self) -> int:
         """Get the selected queue index."""

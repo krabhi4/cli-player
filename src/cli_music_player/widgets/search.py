@@ -1,13 +1,15 @@
 """Search modal widget."""
 
+from typing import ClassVar
+
 from textual.app import ComposeResult
+from textual.binding import BindingType
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     DataTable,
     Input,
-    Label,
     Static,
     TabbedContent,
     TabPane,
@@ -86,7 +88,7 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
     }
     """
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[BindingType]] = [
         ("escape", "dismiss_search", "Close"),
     ]
 
@@ -107,11 +109,11 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
                 id="search-status",
             )
             with TabbedContent(id="search-tabs"):
-                with TabPane(f"Songs (0)", id="search-tab-songs"):
+                with TabPane("Songs (0)", id="search-tab-songs"):
                     yield DataTable(id="search-songs")
-                with TabPane(f"Albums (0)", id="search-tab-albums"):
+                with TabPane("Albums (0)", id="search-tab-albums"):
                     yield DataTable(id="search-albums")
-                with TabPane(f"Artists (0)", id="search-tab-artists"):
+                with TabPane("Artists (0)", id="search-tab-artists"):
                     yield DataTable(id="search-artists")
 
     def on_mount(self) -> None:
@@ -188,9 +190,7 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
             except Exception:
                 pass
 
-            status.update(
-                f"Found {len(songs)} songs, {len(albums)} albums, {len(artists)} artists"
-            )
+            status.update(f"Found {len(songs)} songs, {len(albums)} albums, {len(artists)} artists")
 
         except Exception as e:
             status.update(f"Error: {e}")
@@ -198,17 +198,11 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
         table_id = event.data_table.id
         try:
-            if table_id == "search-songs" and 0 <= event.cursor_row < len(
-                self.results.songs
-            ):
+            if table_id == "search-songs" and 0 <= event.cursor_row < len(self.results.songs):
                 self.dismiss(self.results.songs[event.cursor_row])
-            elif table_id == "search-albums" and 0 <= event.cursor_row < len(
-                self.results.albums
-            ):
+            elif table_id == "search-albums" and 0 <= event.cursor_row < len(self.results.albums):
                 self.dismiss(self.results.albums[event.cursor_row])
-            elif table_id == "search-artists" and 0 <= event.cursor_row < len(
-                self.results.artists
-            ):
+            elif table_id == "search-artists" and 0 <= event.cursor_row < len(self.results.artists):
                 self.dismiss(self.results.artists[event.cursor_row])
         except (IndexError, AttributeError):
             # Results were cleared or modified during selection

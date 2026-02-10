@@ -1,8 +1,9 @@
 """Audio playback engine using python-mpv."""
 
+import contextlib
 import threading
-import time
-from typing import Callable, Optional
+from collections.abc import Callable
+from typing import Any
 
 import mpv
 
@@ -19,18 +20,18 @@ class Player:
     """MPV-based audio player for streaming from Navidrome."""
 
     def __init__(self, audio_device: str = "auto"):
-        self._mpv: Optional[mpv.MPV] = None
+        self._mpv: mpv.MPV | None = None
         self._state = PlaybackState.STOPPED
-        self._current_song: Optional[Song] = None
+        self._current_song: Song | None = None
         self._volume: int = 75
         self._muted: bool = False
         self._audio_device = audio_device
 
         # Callbacks
-        self.on_track_end: Optional[Callable] = None
-        self.on_position_update: Optional[Callable[[float, float], None]] = None
-        self.on_state_change: Optional[Callable[[str], None]] = None
-        self.on_metadata_update: Optional[Callable[[dict], None]] = None
+        self.on_track_end: Callable | None = None
+        self.on_position_update: Callable[[float, float], None] | None = None
+        self.on_state_change: Callable[[str], None] | None = None
+        self.on_metadata_update: Callable[[dict], None] | None = None
 
         self._position: float = 0.0
         self._duration: float = 0.0
@@ -40,7 +41,7 @@ class Player:
 
     def _init_mpv(self):
         """Initialize the mpv instance."""
-        opts = {
+        opts: dict[str, Any] = {
             "video": False,  # Audio only
             "input_default_bindings": False,
             "input_vo_keyboard": False,
@@ -90,15 +91,14 @@ class Player:
         @self._mpv.event_callback("end-file")
         def _eof_handler(event):
             try:
-                if event.data.reason == 0:  # 0 = EOF (natural end)
-                    if self._state == PlaybackState.PLAYING:
-                        self._state = PlaybackState.STOPPED
-                        if self.on_track_end:
-                            self.on_track_end()
+                if event.data.reason == 0 and self._state == PlaybackState.PLAYING:
+                    self._state = PlaybackState.STOPPED
+                    if self.on_track_end:
+                        self.on_track_end()
             except Exception:
                 pass
 
-    def play(self, url: str, song: Optional[Song] = None):
+    def play(self, url: str, song: Song | None = None):
         """Play a song from a URL."""
         with self._lock:
             self._current_song = song
@@ -188,7 +188,7 @@ class Player:
         return self._state
 
     @property
-    def current_song(self) -> Optional[Song]:
+    def current_song(self) -> Song | None:
         return self._current_song
 
     @property
@@ -222,8 +222,6 @@ class Player:
     def cleanup(self):
         """Clean up mpv instance."""
         if self._mpv:
-            try:
+            with contextlib.suppress(Exception):
                 self._mpv.terminate()
-            except Exception:
-                pass
             self._mpv = None

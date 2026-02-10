@@ -1,10 +1,12 @@
 """Help overlay widget — keybinding reference."""
 
-from textual.app import ComposeResult
-from textual.screen import ModalScreen
-from textual.containers import Vertical, VerticalScroll, Horizontal
-from textual.widgets import Button, Static
+from typing import ClassVar
 
+from textual.app import ComposeResult
+from textual.binding import BindingType
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.screen import ModalScreen
+from textual.widgets import Button, Static
 
 HELP_TEXT = """\
 [bold cyan]Keyboard Shortcuts[/bold cyan]
@@ -115,7 +117,7 @@ class HelpModal(ModalScreen[None]):
     }
     """
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[BindingType]] = [
         ("escape", "dismiss_help", "Close"),
         ("question_mark", "dismiss_help", "Close"),
     ]

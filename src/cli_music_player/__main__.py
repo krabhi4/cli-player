@@ -12,7 +12,9 @@ def main():
         prog="music-player",
     )
     parser.add_argument(
-        "-v", "-V", "--version",
+        "-v",
+        "-V",
+        "--version",
         action="version",
         version=f"%(prog)s {__version__}",
     )
@@ -31,12 +33,14 @@ def main():
 
     # Set custom config dir if specified
     if args.config_dir:
-        from . import config as cfg
-        from pathlib import Path
+        from pathlib import Path  # noqa: PLC0415
+
+        from . import config as cfg  # noqa: PLC0415
+
         cfg.CONFIG_DIR = Path(args.config_dir)
         cfg.CONFIG_FILE = cfg.CONFIG_DIR / "config.json"
 
-    from .app import MusicPlayerApp
+    from .app import MusicPlayerApp  # noqa: PLC0415
 
     app = MusicPlayerApp()
 

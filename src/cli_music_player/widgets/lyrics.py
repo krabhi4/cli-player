@@ -45,9 +45,7 @@ class LyricsPanel(Widget):
     def compose(self) -> ComposeResult:
         yield Static("Lyrics", classes="lyrics-header", id="lyrics-header")
         with VerticalScroll(id="lyrics-scroll"):
-            yield Static(
-                "No lyrics available", id="lyrics-text", classes="lyrics-text"
-            )
+            yield Static("No lyrics available", id="lyrics-text", classes="lyrics-text")
 
     def set_lyrics(self, title: str, artist: str, text: str):
         """Set the lyrics content."""

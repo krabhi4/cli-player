@@ -1,6 +1,12 @@
 """Equalizer engine using mpv's superequalizer audio filter."""
 
-from typing import Optional
+from __future__ import annotations
+
+import math
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .player import Player
 
 from .config import AppConfig, EQPreset
 
@@ -60,7 +66,7 @@ class Equalizer:
         self.config = config
         self.gains: list[float] = [0.0] * 18
         self.enabled: bool = True
-        self._player = None  # Set by app after player init
+        self._player: Player | None = None  # Set by app after player init
 
         # Load last used preset
         preset = config.get_eq_preset(config.active_eq_preset)
@@ -93,8 +99,6 @@ class Equalizer:
             #   2.0 ≈ +6 dB
             #   0.5 ≈ -6 dB
             # Valid range is 0 to 20
-            import math
-
             linear_gain = math.pow(10, clamped / 20.0)
             # Clamp to superequalizer's valid range
             linear_gain = max(0.0, min(20.0, linear_gain))

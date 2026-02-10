@@ -1,8 +1,8 @@
 """Play queue and playlist management."""
 
+import contextlib
 import random
 from enum import Enum
-from typing import Optional
 
 from .subsonic import Song
 
@@ -55,7 +55,7 @@ class QueueManager:
         return self._current_index
 
     @property
-    def current_song(self) -> Optional[Song]:
+    def current_song(self) -> Song | None:
         if 0 <= self._current_index < len(self._queue):
             return self._queue[self._current_index]
         return None
@@ -119,10 +119,8 @@ class QueueManager:
             self._queue.pop(index)
             # Also remove from original queue if present
             if index < len(self._original_queue):
-                try:
+                with contextlib.suppress(IndexError):
                     self._original_queue.pop(index)
-                except IndexError:
-                    pass
 
             if index < self._current_index:
                 self._current_index -= 1
@@ -166,7 +164,7 @@ class QueueManager:
             elif to_idx <= self._current_index < from_idx:
                 self._current_index += 1
 
-    def next(self) -> Optional[Song]:
+    def next(self) -> Song | None:
         """Advance to the next song and return it."""
         if self.is_empty:
             return None
@@ -183,17 +181,16 @@ class QueueManager:
                 self._current_index = random.randint(0, len(self._queue) - 1)
             else:
                 return None
+        elif self._current_index < len(self._queue) - 1:
+            self._current_index += 1
+        elif self._repeat == RepeatMode.ALL:
+            self._current_index = 0
         else:
-            if self._current_index < len(self._queue) - 1:
-                self._current_index += 1
-            elif self._repeat == RepeatMode.ALL:
-                self._current_index = 0
-            else:
-                return None
+            return None
 
         return self.current_song
 
-    def previous(self) -> Optional[Song]:
+    def previous(self) -> Song | None:
         """Go to the previous song and return it."""
         if self.is_empty:
             return None
@@ -209,7 +206,7 @@ class QueueManager:
 
         return self.current_song
 
-    def jump_to(self, index: int) -> Optional[Song]:
+    def jump_to(self, index: int) -> Song | None:
         """Jump to a specific index in the queue and return the song."""
         if 0 <= index < len(self._queue):
             self._current_index = index
@@ -248,7 +245,7 @@ class QueueManager:
         current = self.current_song
         others = [s for i, s in enumerate(self._queue) if i != self._current_index]
         random.shuffle(others)
-        self._queue = [current] + others if current else others
+        self._queue = [current, *others] if current else others
         self._current_index = 0
         self._history = []
 

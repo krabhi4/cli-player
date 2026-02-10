@@ -3,8 +3,7 @@
 
 def format_duration(seconds: int) -> str:
     """Format seconds as M:SS or H:MM:SS."""
-    if seconds < 0:
-        seconds = 0
+    seconds = max(seconds, 0)
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     secs = seconds % 60
@@ -26,11 +25,12 @@ def format_duration_long(seconds: int) -> str:
 
 def format_size(bytes_val: int) -> str:
     """Format bytes as human-readable size."""
+    value = float(bytes_val)
     for unit in ["B", "KB", "MB", "GB"]:
-        if bytes_val < 1024:
-            return f"{bytes_val:.1f} {unit}"
-        bytes_val /= 1024
-    return f"{bytes_val:.1f} TB"
+        if value < 1024:
+            return f"{value:.1f} {unit}"
+        value /= 1024
+    return f"{value:.1f} TB"
 
 
 def truncate(text: str, max_len: int, suffix: str = "…") -> str:

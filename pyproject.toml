@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cli-music-player"
-version = "2.0.1"
+version = "2.0.2"
 description = "A terminal-based music player for Navidrome instances"
 license = {text = "MIT"}
 requires-python = ">=3.11"
@@ -16,6 +16,14 @@ dependencies = [
     "cryptography>=42.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
+    "types-requests>=2.31.0",
+]
+
 [project.scripts]
 music-player = "cli_music_player.__main__:main"
 
@@ -24,3 +32,80 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 cli_music_player = ["styles/*.tcss"]
+
+# Ruff configuration
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "EM",     # flake8-errmsg
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "PL",     # pylint
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "PLR0913", # too many arguments
+    "PLR2004", # magic value comparison
+    "EM101",  # Exception must not use string literal
+    "EM102",  # Exception must not use f-string literal
+]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+# Mypy configuration
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = false
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+show_error_codes = true
+
+# Less strict settings for gradual typing adoption
+disallow_untyped_defs = false
+disallow_any_generics = false
+disallow_untyped_calls = false
+check_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "mpv.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "textual.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "keyring.*"
+ignore_missing_imports = true

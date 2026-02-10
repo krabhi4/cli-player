@@ -39,7 +39,7 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 # https://github.com/krabhi4/cli-player/releases
 
 # Install it
-sudo dpkg -i cli-music-player_2.0.1_amd64.deb
+sudo dpkg -i cli-music-player_2.0.2_amd64.deb
 
 # Run from anywhere
 music-player
@@ -62,7 +62,7 @@ sudo dpkg -r cli-music-player
 git clone https://github.com/krabhi4/cli-player.git
 cd cli-player
 ./build-deb.sh
-sudo dpkg -i cli-music-player_2.0.1_amd64.deb
+sudo dpkg -i cli-music-player_2.0.2_amd64.deb
 ```
 
 ### Option 3: Run from source (development)
@@ -124,6 +124,33 @@ Config is stored at `~/.config/cli-music-player/config.json` and includes:
 - Audio device setting
 
 ## What's New
+
+### v2.0.2 (2026-02-11) - Code Quality Release
+
+Comprehensive lint and type-checking cleanup across the entire codebase:
+
+**Lint Fixes (ruff):**
+- Added `ClassVar` annotations to all mutable class-level `BINDINGS` attributes
+- Replaced bare `try/except pass` blocks with `contextlib.suppress()` for cleaner error handling
+- Merged nested `if` statements into single conditions for readability
+- Used `Path.open()` instead of built-in `open()` for pathlib consistency
+- Replaced list concatenation with unpacking (`[current, *others]`)
+- Used ternary expressions where appropriate
+- Escaped ambiguous Unicode characters in UI strings
+- Moved `import math` to module top-level in equalizer (was inside loop)
+
+**Type Fixes (mypy):**
+- Fixed `float`-to-`int` type mismatch in `format_size()` utility
+- Replaced invalid `session.timeout` attribute with proper instance variable in `SubsonicClient`
+- Added `dict[str, Any]` type annotation for mpv options to allow mixed value types
+- Added `Player | None` type annotation for equalizer's `_player` field (fixed false "unreachable" error)
+- Added null-safety guards for `active_server` and `client` access
+- Fixed type ignore for cross-component `action_seek_to` call
+
+**Code Quality Tooling:**
+- Full ruff lint and mypy strict checks now pass with zero errors
+- All 18 source files pass type checking cleanly
+- ruff formatting verified across all files
 
 ### v2.0.1 (2026-02-11) - Bug Fix Release
 
