@@ -20,6 +20,7 @@ dependencies = [
 dev = [
     "ruff>=0.8.0",
     "mypy>=1.13.0",
+    "basedpyright>=1.21.0",
     "pre-commit>=4.0.0",
     "types-requests>=2.31.0",
 ]
@@ -74,6 +75,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
+"tests/**" = ["PT009", "PT027", "N801", "N802", "PTH118", "PTH120", "PTH110", "PTH107", "PTH106", "F403", "F841", "SIM108", "SIM105", "E722", "B007", "RET504", "PLC0415"]  # Relax rules for test files
+"src/cli_music_player/__main__.py" = ["PLC0415"]  # Allow conditional imports for config override
+"src/cli_music_player/config.py" = ["PLC0415"]  # Allow lazy import of cryptography
 
 [tool.ruff.format]
 quote-style = "double"
@@ -88,6 +92,7 @@ warn_redundant_casts = true
 warn_unused_ignores = false
 warn_no_return = true
 warn_unreachable = true
+warn_return_any = false
 strict_equality = true
 show_error_codes = true
 
@@ -109,3 +114,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "keyring.*"
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "tests.run_all_tests"
+ignore_errors = true

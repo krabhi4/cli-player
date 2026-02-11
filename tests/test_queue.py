@@ -74,14 +74,13 @@ class TestQueueManager(unittest.TestCase):
         self.assertFalse(self.queue.is_empty)
         self.assertEqual(self.queue.length, 10)
         self.assertEqual(self.queue.current_index, 2)
+        assert self.queue.current_song is not None
         self.assertEqual(self.queue.current_song.id, "song2")
 
     def test_add_song(self):
         """Test adding single song"""
         self.queue.set_queue(self.songs[:5], 0)
-        new_song = Song(
-            id="new", title="New Song", artist="Test", album="Test", duration=200
-        )
+        new_song = Song(id="new", title="New Song", artist="Test", album="Test", duration=200)
 
         self.queue.add(new_song)
 
@@ -100,9 +99,7 @@ class TestQueueManager(unittest.TestCase):
     def test_add_next(self):
         """Test adding song next in queue"""
         self.queue.set_queue(self.songs[:5], 2)
-        new_song = Song(
-            id="next", title="Next Song", artist="Test", album="Test", duration=150
-        )
+        new_song = Song(id="next", title="Next Song", artist="Test", album="Test", duration=150)
 
         self.queue.add_next(new_song)
 
@@ -171,6 +168,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.next()
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song1")
         self.assertEqual(self.queue.current_index, 1)
 
@@ -190,6 +188,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.next()
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song0")
         self.assertEqual(self.queue.current_index, 0)
 
@@ -201,6 +200,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.next()
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song2")
         self.assertEqual(self.queue.current_index, 2)
 
@@ -211,6 +211,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.previous()
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song2")
         self.assertEqual(self.queue.current_index, 2)
 
@@ -230,6 +231,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.previous()
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song4")
         self.assertEqual(self.queue.current_index, 4)
 
@@ -247,20 +249,24 @@ class TestQueueManager(unittest.TestCase):
         """Test shuffle keeps current song at index 0"""
         self.queue.set_queue(self.songs, 5)
         current_song = self.queue.current_song
+        assert current_song is not None  # Type narrowing
 
         self.queue.set_shuffle(True)
 
         self.assertEqual(self.queue.current_index, 0)
+        assert self.queue.current_song is not None  # Type narrowing
         self.assertEqual(self.queue.current_song.id, current_song.id)
 
     def test_unshuffle_restores_order(self):
         """Test unshuffle restores original order"""
         self.queue.set_queue(self.songs, 3)
         original_song = self.queue.current_song
+        assert original_song is not None  # Type narrowing
 
         self.queue.set_shuffle(True)
         self.queue.set_shuffle(False)
 
+        assert self.queue.current_song is not None  # Type narrowing
         self.assertEqual(self.queue.current_song.id, original_song.id)
         # Queue should be back in original order
         for i, song in enumerate(self.queue.queue):
@@ -293,6 +299,7 @@ class TestQueueManager(unittest.TestCase):
         song = self.queue.jump_to(5)
 
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing
         self.assertEqual(song.id, "song5")
         self.assertEqual(self.queue.current_index, 5)
 

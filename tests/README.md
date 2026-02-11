@@ -11,7 +11,7 @@ This test suite provides thorough coverage of:
 - ✅ Configuration (settings, encryption, persistence)
 - ✅ Equalizer (18-band EQ, presets, dB conversion)
 
-**Total Tests:** 120+ test cases  
+**Total Tests:** 120+ test cases
 **Coverage:** Core functionality, edge cases, error handling
 
 ## Quick Start
@@ -68,7 +68,7 @@ python3 tests/run_all_tests.py -q
 ## Test Categories
 
 ### 1. Bug Fixes (v2.0.1)
-**File:** `test_bug_fixes.py`  
+**File:** `test_bug_fixes.py`
 **Tests:** 24 tests covering all 12 bug fixes
 
 - ✅ Double scrobbling prevention
@@ -85,7 +85,7 @@ python3 tests/run_all_tests.py -q
 - ✅ EQ click edge cases
 
 ### 2. Subsonic API Client
-**File:** `test_subsonic.py`  
+**File:** `test_subsonic.py`
 **Tests:** 20+ tests
 
 **Data Models:**
@@ -110,7 +110,7 @@ python3 tests/run_all_tests.py -q
 - Get genres
 
 ### 3. Queue Manager
-**File:** `test_queue.py`  
+**File:** `test_queue.py`
 **Tests:** 40+ tests
 
 **Core Functionality:**
@@ -136,7 +136,7 @@ python3 tests/run_all_tests.py -q
 - Index validation
 
 ### 4. Configuration
-**File:** `test_config.py`  
+**File:** `test_config.py`
 **Tests:** 30+ tests
 
 **Password Security:**
@@ -162,7 +162,7 @@ python3 tests/run_all_tests.py -q
 - Preset management
 
 ### 5. Equalizer
-**File:** `test_equalizer.py`  
+**File:** `test_equalizer.py`
 **Tests:** 30+ tests
 
 **Core Functionality:**
@@ -224,23 +224,23 @@ from cli_music_player.module import ClassName
 
 class TestClassName(unittest.TestCase):
     """Test ClassName functionality"""
-    
+
     def setUp(self):
         """Run before each test"""
         pass
-    
+
     def tearDown(self):
         """Run after each test"""
         pass
-    
+
     def test_feature_name(self):
         """Test specific feature"""
         # Arrange
         expected = "value"
-        
+
         # Act
         result = do_something()
-        
+
         # Assert
         self.assertEqual(result, expected)
 

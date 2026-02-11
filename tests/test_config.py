@@ -3,7 +3,6 @@
 Comprehensive tests for Configuration Management (FIXED)
 """
 
-import json
 import os
 import sys
 import tempfile
@@ -68,9 +67,7 @@ class TestServerConfig(unittest.TestCase):
 
     def test_server_config_creation(self):
         """Test creating server config"""
-        server = ServerConfig(
-            name="Test Server", url="http://localhost:4533", username="testuser"
-        )
+        server = ServerConfig(name="Test Server", url="http://localhost:4533", username="testuser")
 
         self.assertEqual(server.name, "Test Server")
         self.assertEqual(server.url, "http://localhost:4533")
@@ -158,9 +155,7 @@ class TestAppConfig(unittest.TestCase):
 
         # Patch the module-level constants
         self.patcher_dir = patch("cli_music_player.config.CONFIG_DIR", test_config_dir)
-        self.patcher_file = patch(
-            "cli_music_player.config.CONFIG_FILE", test_config_file
-        )
+        self.patcher_file = patch("cli_music_player.config.CONFIG_FILE", test_config_file)
 
         self.patcher_dir.start()
         self.patcher_file.start()
@@ -250,6 +245,7 @@ class TestAppConfig(unittest.TestCase):
         config.set_active_server(1)
 
         self.assertEqual(config.active_server_index, 1)
+        assert config.active_server is not None  # Type narrowing
         self.assertEqual(config.active_server.name, "Server 2")
 
     def test_active_server_property(self):
@@ -261,6 +257,7 @@ class TestAppConfig(unittest.TestCase):
         server = config.active_server
 
         self.assertIsNotNone(server)
+        assert server is not None  # Type narrowing
         self.assertEqual(server.name, "Test")
 
     def test_active_server_none_when_no_servers(self):
@@ -276,6 +273,7 @@ class TestAppConfig(unittest.TestCase):
         preset = config.get_eq_preset("Flat")
 
         self.assertIsNotNone(preset)
+        assert preset is not None  # Type narrowing
         self.assertEqual(preset.name, "Flat")
 
     def test_get_nonexistent_eq_preset(self):
@@ -295,6 +293,7 @@ class TestAppConfig(unittest.TestCase):
 
         preset = config.get_eq_preset("My Preset")
         self.assertIsNotNone(preset)
+        assert preset is not None  # Type narrowing
         self.assertEqual(preset.gains[0], 5.0)
 
 

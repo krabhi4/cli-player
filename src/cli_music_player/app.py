@@ -356,7 +356,7 @@ class MusicPlayerApp(App):
         """Disable certain app bindings when specific widgets are focused."""
         focused = self.focused
 
-        if action == "go_back" and focused and isinstance(focused, (Input, Select, EQBand)):
+        if action == "go_back" and focused and isinstance(focused, Input | Select | EQBand):
             return None
 
         # Disable seek bindings when EQ band is focused (left/right navigate bands)

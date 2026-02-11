@@ -1,0 +1,27 @@
+{
+    "include": ["src", "tests"],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/.venv",
+        "**/build",
+        "**/dist"
+    ],
+    "pythonVersion": "3.11",
+    "typeCheckingMode": "basic",
+    "reportMissingImports": "warning",
+    "reportMissingTypeStubs": false,
+    "reportMissingModuleSource": false,
+    "reportUnknownMemberType": false,
+    "reportUnknownArgumentType": false,
+    "reportUnknownVariableType": false,
+    "reportUnknownLambdaType": false,
+    "reportUnusedImport": false,
+    "reportUnusedVariable": false,
+    "reportDuplicateImport": true,
+    "reportReturnType": "error",
+    "reportOptionalMemberAccess": "error",
+    "reportCallIssue": "error",
+    "reportAttributeAccessIssue": "error",
+    "stubPath": ""
+}

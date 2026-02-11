@@ -57,6 +57,7 @@ class Player:
             opts["audio_device"] = f"alsa/{self._audio_device}"
 
         self._mpv = mpv.MPV(**opts)
+        assert self._mpv is not None  # Type narrowing
 
         # Observe properties
         @self._mpv.property_observer("time-pos")
@@ -214,7 +215,8 @@ class Player:
         """Get current audio filter string."""
         if self._mpv:
             try:
-                return self._mpv.af or ""
+                af = self._mpv.af
+                return str(af) if af else ""
             except Exception:
                 return ""
         return ""

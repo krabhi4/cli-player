@@ -7,16 +7,15 @@ Tests all 12 critical and high-priority bug fixes
 import os
 import sys
 import threading
-import time
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from cli_music_player.config import decrypt_password, encrypt_password
-from cli_music_player.equalizer import GAIN_MAX, GAIN_MIN, Equalizer
-from cli_music_player.queue import QueueManager, RepeatMode
+from cli_music_player.equalizer import Equalizer
+from cli_music_player.queue import QueueManager
 from cli_music_player.subsonic import Song, SubsonicClient
 
 
@@ -68,6 +67,7 @@ class TestBugFix2_QueueJumpTo(unittest.TestCase):
         """Test jumping to valid queue index"""
         song = self.queue.jump_to(2)
         self.assertIsNotNone(song)
+        assert song is not None  # Type narrowing for mypy/pyright
         self.assertEqual(song.id, "song2")
         self.assertEqual(self.queue.current_index, 2)
 
@@ -181,16 +181,16 @@ class TestBugFix6_ThreadSafety(unittest.TestCase):
         """Test that concurrent access doesn't cause issues"""
         # This is more of an integration test
         # Here we verify the pattern exists
-        import threading
 
-        shared_state = {"position": 0.0, "lock": threading.Lock()}
+        lock = threading.Lock()
+        shared_state = {"position": 0.0}
 
         def update_position(value):
-            with shared_state["lock"]:
+            with lock:
                 shared_state["position"] = value
 
         def read_position():
-            with shared_state["lock"]:
+            with lock:
                 return shared_state["position"]
 
         threads = []
@@ -453,9 +453,8 @@ def run_tests():
     if result.wasSuccessful():
         print("✅ ALL TESTS PASSED!")
         return 0
-    else:
-        print("❌ SOME TESTS FAILED")
-        return 1
+    print("❌ SOME TESTS FAILED")
+    return 1
 
 
 if __name__ == "__main__":

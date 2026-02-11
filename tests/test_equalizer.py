@@ -51,9 +51,7 @@ class TestEqualizer(unittest.TestCase):
         test_config_file = test_config_dir / "config.json"
 
         self.patcher_dir = patch("cli_music_player.config.CONFIG_DIR", test_config_dir)
-        self.patcher_file = patch(
-            "cli_music_player.config.CONFIG_FILE", test_config_file
-        )
+        self.patcher_file = patch("cli_music_player.config.CONFIG_FILE", test_config_file)
 
         self.patcher_dir.start()
         self.patcher_file.start()
@@ -246,6 +244,7 @@ class TestEqualizer(unittest.TestCase):
         # Should be able to retrieve it
         preset = self.config.get_eq_preset("Custom Test")
         self.assertIsNotNone(preset)
+        assert preset is not None  # Type narrowing
         self.assertEqual(preset.gains[0], 5.0)
 
     def test_band_label_static_method(self):
@@ -270,9 +269,7 @@ class TestEqualizerPresets(unittest.TestCase):
         test_config_file = test_config_dir / "config.json"
 
         self.patcher_dir = patch("cli_music_player.config.CONFIG_DIR", test_config_dir)
-        self.patcher_file = patch(
-            "cli_music_player.config.CONFIG_FILE", test_config_file
-        )
+        self.patcher_file = patch("cli_music_player.config.CONFIG_FILE", test_config_file)
 
         self.patcher_dir.start()
         self.patcher_file.start()

@@ -9,7 +9,6 @@ import os
 import sys
 import time
 import unittest
-from io import StringIO
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -71,25 +70,15 @@ def get_test_suites():
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix1_DoubleScrobbling"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix2_QueueJumpTo"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix3_SessionCleanup"),
-                loader.loadTestsFromName(
-                    "test_bug_fixes.TestBugFix4_PasswordDecryption"
-                ),
+                loader.loadTestsFromName("test_bug_fixes.TestBugFix4_PasswordDecryption"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix5_QueueRemove"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix6_ThreadSafety"),
-                loader.loadTestsFromName(
-                    "test_bug_fixes.TestBugFix7_SearchResultsBounds"
-                ),
+                loader.loadTestsFromName("test_bug_fixes.TestBugFix7_SearchResultsBounds"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix8_NegativeIndices"),
-                loader.loadTestsFromName(
-                    "test_bug_fixes.TestBugFix9_NavigationHistory"
-                ),
-                loader.loadTestsFromName(
-                    "test_bug_fixes.TestBugFix10_EqualizerConversion"
-                ),
+                loader.loadTestsFromName("test_bug_fixes.TestBugFix9_NavigationHistory"),
+                loader.loadTestsFromName("test_bug_fixes.TestBugFix10_EqualizerConversion"),
                 loader.loadTestsFromName("test_bug_fixes.TestBugFix11_RequestTimeout"),
-                loader.loadTestsFromName(
-                    "test_bug_fixes.TestBugFix12_EqualizerClickBounds"
-                ),
+                loader.loadTestsFromName("test_bug_fixes.TestBugFix12_EqualizerClickBounds"),
             ]
         ),
         "Subsonic API Client": unittest.TestSuite(
@@ -166,15 +155,14 @@ def print_summary(results):
         print()
         print("Coverage by Category:")
         return True
-    else:
-        print("❌ SOME TESTS FAILED")
-        print()
-        print("Failed Tests:")
-        for result in results:
-            for test, traceback in result.failures + result.errors:
-                print(f"  - {test}")
-        print()
-        return False
+    print("❌ SOME TESTS FAILED")
+    print()
+    print("Failed Tests:")
+    for result in results:
+        for test, traceback in result.failures + result.errors:
+            print(f"  - {test}")
+    print()
+    return False
 
 
 def print_coverage_breakdown(results_dict):
@@ -276,8 +264,7 @@ def main():
 
     if args.category:
         return run_specific_category(args.category, verbosity)
-    else:
-        return run_all_tests(verbosity)
+    return run_all_tests(verbosity)
 
 
 if __name__ == "__main__":

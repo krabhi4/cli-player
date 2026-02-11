@@ -114,7 +114,7 @@ def _derive_key() -> bytes:
 
 def encrypt_password(password: str) -> str:
     """Encrypt a password for storage."""
-    from cryptography.fernet import Fernet  # noqa: PLC0415
+    from cryptography.fernet import Fernet
 
     key = base64.urlsafe_b64encode(_derive_key())
     f = Fernet(key)
@@ -127,7 +127,7 @@ def decrypt_password(encrypted: str) -> str:
     Raises:
         ValueError: If the encrypted password cannot be decrypted (e.g., wrong key/machine).
     """
-    from cryptography.fernet import Fernet, InvalidToken  # noqa: PLC0415
+    from cryptography.fernet import Fernet, InvalidToken
 
     key = base64.urlsafe_b64encode(_derive_key())
     f = Fernet(key)

@@ -6,7 +6,7 @@ Comprehensive tests for Subsonic API client
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
@@ -242,9 +242,7 @@ class TestSubsonicAPIMethods(unittest.TestCase):
     def _mock_response(self, data):
         """Helper to create mock response"""
         mock_response = Mock()
-        mock_response.json.return_value = {
-            "subsonic-response": {"status": "ok", **data}
-        }
+        mock_response.json.return_value = {"subsonic-response": {"status": "ok", **data}}
         self.mock_session.get.return_value = mock_response
 
     def test_get_album_list(self):
@@ -294,9 +292,7 @@ class TestSubsonicAPIMethods(unittest.TestCase):
             {
                 "searchResult3": {
                     "artist": [{"id": "1", "name": "Test Artist"}],
-                    "album": [
-                        {"id": "2", "name": "Test Album", "artist": "Test Artist"}
-                    ],
+                    "album": [{"id": "2", "name": "Test Album", "artist": "Test Artist"}],
                     "song": [
                         {
                             "id": "3",

@@ -33,14 +33,14 @@ def main():
 
     # Set custom config dir if specified
     if args.config_dir:
-        from pathlib import Path  # noqa: PLC0415
+        from pathlib import Path
 
-        from . import config as cfg  # noqa: PLC0415
+        from . import config as cfg
 
         cfg.CONFIG_DIR = Path(args.config_dir)
         cfg.CONFIG_FILE = cfg.CONFIG_DIR / "config.json"
 
-    from .app import MusicPlayerApp  # noqa: PLC0415
+    from .app import MusicPlayerApp
 
     app = MusicPlayerApp()
 

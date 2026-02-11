@@ -1,4 +1,4 @@
-<!-- 
+<!--
 Before submitting this PR:
 - Have you read the Contributing Guide? https://github.com/krabhi4/cli-player/blob/main/CONTRIBUTING.md
 - Have you run the test suite? `python3 tests/run_all_tests.py`
@@ -20,7 +20,7 @@ Before submitting this PR:
 
 ## Description
 
-<!-- 
+<!--
 Provide a clear and detailed description of what this PR does.
 Include screenshots/GIFs for UI changes when possible.
 Explain WHY this change is needed, not just WHAT changed.
@@ -37,7 +37,7 @@ Explain WHY this change is needed, not just WHAT changed.
 
 ## Related Issues
 
-<!-- 
+<!--
 Link any related issues. Use keywords to auto-close them:
 - Closes #123
 - Fixes #456
@@ -48,7 +48,7 @@ Link any related issues. Use keywords to auto-close them:
 
 ## How Has This Been Tested?
 
-<!-- 
+<!--
 Describe the tests you ran to verify your changes.
 Provide instructions so reviewers can reproduce.
 Include details of your testing environment.
@@ -57,12 +57,12 @@ Include details of your testing environment.
 - [ ] All existing tests pass (`python3 tests/run_all_tests.py`)
 - [ ] Added new tests for this change
 - [ ] Manually tested the following scenarios:
-  - 
+  -
 
 **Test Configuration:**
-- OS: 
-- Python version: 
-- Navidrome version (if applicable): 
+- OS:
+- Python version:
+- Navidrome version (if applicable):
 
 ## Checklist
 
@@ -80,7 +80,7 @@ Please confirm the following:
 
 ## Breaking Changes
 
-<!-- 
+<!--
 If this PR introduces breaking changes, describe:
 - What breaks
 - How users should migrate
@@ -94,7 +94,7 @@ If this PR introduces breaking changes, describe:
 
 ## Additional Notes
 
-<!-- 
+<!--
 Add any additional context, considerations, or concerns here.
 - Are there any potential side effects?
 - Are there edge cases to be aware of?
@@ -104,7 +104,7 @@ Add any additional context, considerations, or concerns here.
 
 ---
 
-<!-- 
+<!--
 For Reviewers:
 - Test the changes locally
 - Verify all tests pass

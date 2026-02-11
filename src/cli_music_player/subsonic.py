@@ -206,7 +206,7 @@ class SubsonicClient:
             error = sub_response.get("error", {})
             raise SubsonicError(error.get("code", -1), error.get("message", "Unknown error"))
 
-        return sub_response
+        return dict(sub_response)  # Type narrowing
 
     def _stream_url(self, song_id: str, fmt: str = "raw") -> str:
         """Build a streaming URL for a song (for mpv to consume)."""
@@ -425,7 +425,7 @@ class SubsonicClient:
             params["title"] = title
         resp = self._request("getLyrics.view", **params)
         lyrics_data = resp.get("lyrics", {})
-        return lyrics_data.get("value", "")
+        return str(lyrics_data.get("value", ""))
 
     # ─── Similar / Discovery ─────────────────────────────────────────
 
