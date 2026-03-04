@@ -1,21 +1,9 @@
 # Build artifacts
-*.deb
-dist/
-build/
-*.egg-info/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-
-# Virtual environment
-venv/
-.venv/
+/target/
 
 # IDE
 .vscode/
 .idea/
 
-# Claude
-CLAUDE.md
+# OS
+.DS_Store
