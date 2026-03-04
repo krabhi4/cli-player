@@ -1,0 +1,229 @@
+"""Audio playback engine using python-mpv."""
+
+import contextlib
+import threading
+from collections.abc import Callable
+from typing import Any
+
+import mpv
+
+from .subsonic import Song
+
+
+class PlaybackState:
+    STOPPED = "stopped"
+    PLAYING = "playing"
+    PAUSED = "paused"
+
+
+class Player:
+    """MPV-based audio player for streaming from Navidrome."""
+
+    def __init__(self, audio_device: str = "auto"):
+        self._mpv: mpv.MPV | None = None
+        self._state = PlaybackState.STOPPED
+        self._current_song: Song | None = None
+        self._volume: int = 75
+        self._muted: bool = False
+        self._audio_device = audio_device
+
+        # Callbacks
+        self.on_track_end: Callable | None = None
+        self.on_position_update: Callable[[float, float], None] | None = None
+        self.on_state_change: Callable[[str], None] | None = None
+        self.on_metadata_update: Callable[[dict], None] | None = None
+
+        self._position: float = 0.0
+        self._duration: float = 0.0
+        self._lock = threading.Lock()
+
+        self._init_mpv()
+
+    def _init_mpv(self):
+        """Initialize the mpv instance."""
+        opts: dict[str, Any] = {
+            "video": False,  # Audio only
+            "input_default_bindings": False,
+            "input_vo_keyboard": False,
+            "terminal": False,
+            "volume": self._volume,
+        }
+
+        # Use ALSA directly since no PulseAudio/PipeWire
+        if self._audio_device == "auto":
+            opts["ao"] = "alsa"
+        else:
+            opts["ao"] = "alsa"
+            opts["audio_device"] = f"alsa/{self._audio_device}"
+
+        self._mpv = mpv.MPV(**opts)
+        assert self._mpv is not None  # Type narrowing
+
+        # Observe properties
+        @self._mpv.property_observer("time-pos")
+        def _time_pos_observer(_name, value):
+            if value is not None:
+                with self._lock:
+                    self._position = float(value)
+                    duration = self._duration
+                if self.on_position_update and duration > 0:
+                    self.on_position_update(self._position, duration)
+
+        @self._mpv.property_observer("duration")
+        def _duration_observer(_name, value):
+            if value is not None:
+                with self._lock:
+                    self._duration = float(value)
+
+        @self._mpv.property_observer("pause")
+        def _pause_observer(_name, value):
+            with self._lock:
+                if value is True:
+                    self._state = PlaybackState.PAUSED
+                elif value is False and self._current_song:
+                    self._state = PlaybackState.PLAYING
+                state = self._state
+            if self.on_state_change:
+                self.on_state_change(state)
+
+        # End of file detection via event callback.
+        # In python-mpv 1.0.x the event data lives at event.data with
+        # event.data.reason == 0 meaning natural EOF.
+        @self._mpv.event_callback("end-file")
+        def _eof_handler(event):
+            try:
+                if event.data.reason == 0 and self._state == PlaybackState.PLAYING:
+                    self._state = PlaybackState.STOPPED
+                    if self.on_track_end:
+                        self.on_track_end()
+            except Exception:
+                pass
+
+    def play(self, url: str, song: Song | None = None):
+        """Play a song from a URL."""
+        with self._lock:
+            self._current_song = song
+            self._position = 0.0
+            self._duration = song.duration if song else 0.0
+            self._state = PlaybackState.PLAYING
+
+            if self._mpv:
+                self._mpv.play(url)
+                self._mpv.pause = False
+
+            if self.on_state_change:
+                self.on_state_change(self._state)
+
+    def pause(self):
+        """Pause playback."""
+        if self._mpv and self._state == PlaybackState.PLAYING:
+            self._mpv.pause = True
+
+    def resume(self):
+        """Resume playback."""
+        if self._mpv and self._state == PlaybackState.PAUSED:
+            self._mpv.pause = False
+
+    def toggle_pause(self):
+        """Toggle play/pause."""
+        if self._state == PlaybackState.PLAYING:
+            self.pause()
+        elif self._state == PlaybackState.PAUSED:
+            self.resume()
+
+    def stop(self):
+        """Stop playback."""
+        # Set state BEFORE mpv.stop() so the eof-reached observer
+        # won't mistake a manual stop for a natural end-of-track.
+        self._state = PlaybackState.STOPPED
+        self._current_song = None
+        self._position = 0.0
+        if self._mpv:
+            self._mpv.stop()
+        if self.on_state_change:
+            self.on_state_change(self._state)
+
+    def seek(self, offset: float):
+        """Seek forward/backward by offset seconds."""
+        if self._mpv and self._state in (
+            PlaybackState.PLAYING,
+            PlaybackState.PAUSED,
+        ):
+            self._mpv.seek(offset, "relative")
+
+    def seek_to(self, position: float):
+        """Seek to an absolute position in seconds."""
+        if self._mpv and self._state in (
+            PlaybackState.PLAYING,
+            PlaybackState.PAUSED,
+        ):
+            self._mpv.seek(position, "absolute")
+
+    @property
+    def volume(self) -> int:
+        return self._volume
+
+    @volume.setter
+    def volume(self, value: int):
+        self._volume = max(0, min(100, value))
+        if self._mpv:
+            self._mpv.volume = self._volume
+
+    def volume_up(self, step: int = 5):
+        self.volume = self._volume + step
+
+    def volume_down(self, step: int = 5):
+        self.volume = self._volume - step
+
+    @property
+    def muted(self) -> bool:
+        return self._muted
+
+    def mute_toggle(self):
+        self._muted = not self._muted
+        if self._mpv:
+            self._mpv.mute = self._muted
+
+    @property
+    def state(self) -> str:
+        return self._state
+
+    @property
+    def current_song(self) -> Song | None:
+        return self._current_song
+
+    @property
+    def position(self) -> float:
+        return self._position
+
+    @property
+    def duration(self) -> float:
+        return self._duration
+
+    def set_audio_filter(self, filter_str: str):
+        """Set an audio filter (used by equalizer)."""
+        if self._mpv:
+            try:
+                if filter_str:
+                    self._mpv.af = filter_str
+                else:
+                    self._mpv.af = ""
+            except Exception:
+                pass  # Filter may fail on some formats
+
+    def get_audio_filter(self) -> str:
+        """Get current audio filter string."""
+        if self._mpv:
+            try:
+                af = self._mpv.af
+                return str(af) if af else ""
+            except Exception:
+                return ""
+        return ""
+
+    def cleanup(self):
+        """Clean up mpv instance."""
+        if self._mpv:
+            with contextlib.suppress(Exception):
+                self._mpv.terminate()
+            self._mpv = None
