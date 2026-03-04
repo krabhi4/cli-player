@@ -37,26 +37,49 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 
 ### Option 1: Download from Releases (recommended)
 
-```bash
-# Download the latest release from GitHub
-# https://github.com/krabhi4/cli-player/releases
+Go to the [Releases page](https://github.com/krabhi4/cli-player/releases) and download the file for your platform:
 
-# Linux — install the .deb package
+| Platform | File to download |
+|---|---|
+| **Linux (x86_64)** | `cli-music-player-x86_64-unknown-linux-gnu.tar.gz` or `.deb` |
+| **macOS (Apple Silicon)** | `cli-music-player-aarch64-apple-darwin.tar.gz` |
+| **macOS (Intel)** | `cli-music-player-x86_64-apple-darwin.tar.gz` |
+
+#### Linux — .deb package (easiest)
+
+```bash
 sudo dpkg -i cli-music-player_3.0.0-1_amd64.deb
-
-# Or use the binary directly (Linux/macOS)
-chmod +x cli-music-player-*
-./cli-music-player-x86_64-unknown-linux-gnu
+cli-music-player
 ```
 
-The .deb package:
-- Installs the binary to `/usr/bin/cli-music-player`
-- Declares system dependency on `libasound2`
+This installs the binary to `/usr/bin/cli-music-player` so you can run it from anywhere.
 
-To uninstall:
+To uninstall: `sudo dpkg -r cli-music-player`
+
+#### Linux / macOS — tarball
+
 ```bash
-sudo dpkg -r cli-music-player
+# 1. Extract the downloaded archive
+tar xzf cli-music-player-*.tar.gz
+
+# 2. Make it executable (macOS/Linux)
+chmod +x cli-music-player
+
+# 3. Run it
+./cli-music-player
 ```
+
+To install it system-wide so you can run it from anywhere:
+
+```bash
+# Linux
+sudo mv cli-music-player /usr/local/bin/
+
+# macOS
+mv cli-music-player /usr/local/bin/
+```
+
+Then just run `cli-music-player` from any terminal.
 
 ### Option 2: Build from source
 
