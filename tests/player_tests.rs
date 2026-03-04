@@ -734,7 +734,7 @@ fn test_equalizer_preset_reverse_cycling() {
 #[test]
 fn test_equalizer_load_preset_changes_gains() {
     let dir = tempdir().unwrap();
-    let mut config = AppConfig::load_from(dir.path());
+    let config = AppConfig::load_from(dir.path());
     let eq = Equalizer::new(&config);
 
     // Initially flat
