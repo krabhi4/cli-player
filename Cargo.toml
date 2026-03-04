@@ -40,3 +40,13 @@ unicode-width = "0.2"
 
 [dev-dependencies]
 tempfile = "3"
+
+[package.metadata.deb]
+maintainer = "krabhi4"
+description = "TUI music player for Navidrome/Subsonic servers"
+section = "sound"
+priority = "optional"
+depends = "libasound2"
+assets = [
+    ["target/release/cli-music-player", "usr/bin/", "755"],
+]

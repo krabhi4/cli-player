@@ -49,6 +49,13 @@ jobs:
         mkdir -p dist
         cp target/${{ matrix.target }}/release/cli-music-player dist/cli-music-player-${{ matrix.target }}
 
+    - name: Build .deb package
+      if: matrix.target == 'x86_64-unknown-linux-gnu'
+      run: |
+        cargo install cargo-deb
+        cargo deb --target ${{ matrix.target }} --no-build
+        cp target/${{ matrix.target }}/debian/*.deb dist/
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
