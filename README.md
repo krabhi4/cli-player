@@ -153,6 +153,10 @@ Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md)
 - All PRs must pass CI (cargo test, cargo clippy, cargo fmt)
 - See [open issues](https://github.com/krabhi4/cli-player/issues) for things to work on
 
+## AI Disclosure
+
+Parts of this project may have been developed with the assistance of AI-powered tools. All code has been reviewed, tested, and validated by the maintainer.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
