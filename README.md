@@ -1,8 +1,11 @@
 # CLI Music Player for Navidrome
 
 [![GitHub release](https://img.shields.io/github/v/release/krabhi4/cli-player)](https://github.com/krabhi4/cli-player/releases)
+[![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Binary Size](https://img.shields.io/badge/binary-~9MB-blue)](https://github.com/krabhi4/cli-player/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Tests](https://img.shields.io/badge/tests-293_passing-brightgreen)](https://github.com/krabhi4/cli-player/actions)
 
 A terminal-based music player that connects to Navidrome instances and plays music locally through your server's speakers.
 
@@ -21,59 +24,54 @@ A terminal-based music player that connects to Navidrome instances and plays mus
 - **Back navigation** — `Escape`/`Backspace` to go back when drilling into albums/artists/genres
 - **Scrobbling** — Automatic play count reporting
 - **Star/Favourite** — Star songs from the player
-- **Beautiful TUI** — Tokyo Night-themed interface with Textual
+- **Beautiful TUI** — Tokyo Night-themed interface built with ratatui
+- **Single binary** — No runtime dependencies, instant startup
 
 ## Requirements
 
-- Debian/Ubuntu (amd64 or arm64)
-- Python 3.11+
-- mpv / libmpv (`sudo apt install mpv libmpv-dev`)
+- Linux (amd64) or macOS (x86_64 / Apple Silicon)
+- ALSA development libraries on Linux (`sudo apt install libasound2-dev`)
 - A running Navidrome instance
 
 ## Installation
 
-### Option 1: Download the .deb from Releases (recommended)
+### Option 1: Download from Releases (recommended)
 
 ```bash
 # Download the latest release from GitHub
 # https://github.com/krabhi4/cli-player/releases
 
-# Install it
-sudo dpkg -i cli-music-player_2.0.2_amd64.deb
+# Linux — install the .deb package
+sudo dpkg -i cli-music-player_3.0.0-1_amd64.deb
 
-# Run from anywhere
-music-player
+# Or use the binary directly (Linux/macOS)
+chmod +x cli-music-player-*
+./cli-music-player-x86_64-unknown-linux-gnu
 ```
 
 The .deb package:
-- Installs the app to `/opt/cli-music-player/`
-- Creates a virtualenv with all Python dependencies automatically
-- Adds `music-player` command to your PATH
-- Declares system dependencies (python3, mpv, libmpv-dev)
+- Installs the binary to `/usr/bin/cli-music-player`
+- Declares system dependency on `libasound2`
 
 To uninstall:
 ```bash
 sudo dpkg -r cli-music-player
 ```
 
-### Option 2: Build .deb from source
+### Option 2: Build from source
 
 ```bash
 git clone https://github.com/krabhi4/cli-player.git
 cd cli-player
-./build-deb.sh
-sudo dpkg -i cli-music-player_2.0.2_amd64.deb
+cargo build --release
+./target/release/cli-music-player
 ```
 
-### Option 3: Run from source (development)
+### Option 3: Install via cargo
 
 ```bash
-git clone https://github.com/krabhi4/cli-player.git
-cd cli-player
-python3 -m venv venv
-source venv/bin/activate
-pip install -e .
-python3 -m cli_music_player
+cargo install --path .
+cli-music-player
 ```
 
 ## Key Bindings
@@ -112,7 +110,7 @@ On first launch, press `S` to open the Server Manager and add your Navidrome ins
 - **URL**: `http://localhost:4533` (or your Navidrome address)
 - **Username/Password**: Your Navidrome credentials
 
-Credentials are encrypted with Fernet and stored locally.
+Credentials are encrypted with AES-GCM and stored locally.
 
 ## Configuration
 
@@ -123,99 +121,28 @@ Config is stored at `~/.config/cli-music-player/config.json` and includes:
 - Custom EQ presets
 - Audio device setting
 
-## What's New
-
-### v2.0.2 (2026-02-11) - Code Quality Release
-
-Comprehensive lint and type-checking cleanup across the entire codebase:
-
-**Lint Fixes (ruff):**
-- Added `ClassVar` annotations to all mutable class-level `BINDINGS` attributes
-- Replaced bare `try/except pass` blocks with `contextlib.suppress()` for cleaner error handling
-- Merged nested `if` statements into single conditions for readability
-- Used `Path.open()` instead of built-in `open()` for pathlib consistency
-- Replaced list concatenation with unpacking (`[current, *others]`)
-- Used ternary expressions where appropriate
-- Escaped ambiguous Unicode characters in UI strings
-- Moved `import math` to module top-level in equalizer (was inside loop)
-
-**Type Fixes (mypy):**
-- Fixed `float`-to-`int` type mismatch in `format_size()` utility
-- Replaced invalid `session.timeout` attribute with proper instance variable in `SubsonicClient`
-- Added `dict[str, Any]` type annotation for mpv options to allow mixed value types
-- Added `Player | None` type annotation for equalizer's `_player` field (fixed false "unreachable" error)
-- Added null-safety guards for `active_server` and `client` access
-- Fixed type ignore for cross-component `action_seek_to` call
-
-**Code Quality Tooling:**
-- Full ruff lint and mypy strict checks now pass with zero errors
-- All 18 source files pass type checking cleanly
-- ruff formatting verified across all files
-
-### v2.0.1 (2026-02-11) - Bug Fix Release
-
-This release fixes **12 critical and high-priority bugs** identified through comprehensive code review:
-
-**Critical Fixes:**
-- **Fixed double scrobbling** — Songs were being scrobbled twice (at 50% completion AND at track end)
-- **Fixed thread safety** — Added safe `jump_to()` method for queue navigation, preventing race conditions
-- **Fixed resource leak** — HTTP sessions are now properly closed, preventing connection pool exhaustion
-- **Fixed password decryption crash** — Gracefully handles decryption failures (e.g., when moving config between machines)
-
-**High-Priority Fixes:**
-- **Fixed queue management** — Proper handling of empty queue and index bounds after removing songs
-- **Fixed player observers** — Thread-safe locks on all property observers (position/duration/state)
-- **Fixed search race condition** — Bounds checking prevents crashes when results change during selection
-- **Fixed negative indices** — Explicit validation in queue move operations
-- **Fixed memory leak** — Navigation history now limited to 50 entries to prevent unbounded growth
-- **Fixed equalizer conversion** — Corrected dB-to-linear formula (now uses `10^(dB/20)` instead of incorrect shift)
-- **Fixed HTTP timeouts** — Timeout now explicitly enforced on all requests
-- **Fixed EQ click handling** — Added bounds clamping and division-by-zero protection for small widgets
-
-All fixes verified through automated test suite (24 tests, 100% pass rate).
-
-### v2.0.0 (2026-02-09) - Major UX Overhaul
-
-- **Starred/Favourites tab** — Browse your starred songs (tab `6`)
-- **Queue management** — Remove (`d`/`Delete`) and reorder (`Shift+Up/Down`) queue items
-- **Back navigation** — `Escape`/`Backspace` to navigate back through browsing history
-- **Loading indicators** — Status bar shows loading feedback during library/search operations
-- **Lyrics display** — Toggle lyrics panel with `l` (uses Subsonic getLyrics API)
-- **Interactive equalizer** — Click or use arrow keys to adjust EQ bands, save custom presets
-- **Artist Radio** — `R` to queue similar songs based on the currently playing track
-- **Album sorting** — `o` to cycle through sort modes (Newest/Random/Frequent/Recent/Starred/A-Z)
-- **Save queue as playlist** — `P` to save the current queue as a server-side playlist
-- **Responsive queue** — Queue title truncation adapts to widget width
-- **Better error feedback** — Errors surfaced to status bar instead of silently swallowed
-
 ## Testing
-
-The project includes a comprehensive automated test suite with **121 tests** covering all major components.
-
-### Run Tests
 
 ```bash
 # Run all tests
-python3 tests/run_all_tests.py
+cargo test
 
-# Run specific category
-python3 tests/run_all_tests.py --category "Bug Fixes (v2.0.1)"
+# Run a specific test file
+cargo test --test queue_tests
 
-# Run individual test file
-python3 tests/test_queue.py
+# Run with output
+cargo test -- --nocapture
 ```
 
 ### Test Coverage
 
-- ✅ **Bug Fixes (v2.0.1)**: 24 tests - All 12 critical bugs verified
-- ✅ **Queue Manager**: 31 tests - Queue operations, shuffle, repeat
-- ✅ **Subsonic API**: 16 tests - Data models, requests, authentication
-- ✅ **Configuration**: 23 tests - Settings, encryption, persistence
-- ✅ **Equalizer**: 27 tests - 18-band EQ, dB conversion, presets
+- **Queue Manager**: 31 tests — Queue operations, shuffle, repeat
+- **Subsonic API**: 16 tests — Data models, requests, authentication
+- **Configuration**: 23 tests — Settings, encryption, persistence
+- **Equalizer**: 27+ tests — 18-band EQ, dB conversion, presets, DSP
+- **Player**: 27+ tests — State transitions, channel conversion, pipeline
 
-**Total: 121 tests | Pass Rate: 100% | Execution Time: <0.4s**
-
-See [tests/README.md](tests/README.md) for detailed testing documentation.
+**Total: 293 tests | Pass Rate: 100%**
 
 ## Contributing
 
@@ -223,10 +150,9 @@ Contributions are welcome! Please read the [Contributing Guide](CONTRIBUTING.md)
 
 - Fork the repo, create a feature branch, open a PR
 - PRs require 1 approval before merge
-- All PRs must pass automated tests (121 tests, 100% pass rate required)
+- All PRs must pass CI (cargo test, cargo clippy, cargo fmt)
 - See [open issues](https://github.com/krabhi4/cli-player/issues) for things to work on
 
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
-# cli-player

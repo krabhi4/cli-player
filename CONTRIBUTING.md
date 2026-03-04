@@ -6,9 +6,8 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ### Prerequisites
 
-- Debian/Ubuntu (amd64 or arm64)
-- Python 3.11+
-- mpv / libmpv (`sudo apt install mpv libmpv-dev`)
+- Rust toolchain (install via [rustup](https://rustup.rs/))
+- ALSA development libraries on Linux (`sudo apt install libasound2-dev`)
 - A running Navidrome instance (for testing)
 
 ### Development Setup
@@ -18,15 +17,14 @@ Thank you for your interest in contributing! This guide will help you get starte
 git clone git@github.com:<your-username>/cli-player.git
 cd cli-player
 
-# Create a virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Build
+cargo build
 
-# Install in development mode
-pip install -e .
+# Run
+cargo run
 
-# Run the app
-python3 -m cli_music_player
+# Run tests
+cargo test
 ```
 
 ## How to Contribute
@@ -34,7 +32,7 @@ python3 -m cli_music_player
 ### Reporting Bugs
 
 - Use the [Bug Report](https://github.com/krabhi4/cli-player/issues/new?template=bug_report.md) issue template
-- Include your OS, Python version, mpv version, and terminal emulator
+- Include your OS, Rust version, and terminal emulator
 - Describe what you expected vs. what happened
 - Include screenshots if it's a UI issue
 
@@ -51,7 +49,12 @@ python3 -m cli_music_player
    git checkout -b feature/your-feature-name
    ```
 3. **Make your changes** — keep commits focused and descriptive
-4. **Test your changes** — make sure the app starts and your feature works
+4. **Test your changes**:
+   ```bash
+   cargo test
+   cargo clippy
+   cargo fmt --check
+   ```
 5. **Push** to your fork:
    ```bash
    git push origin feature/your-feature-name
@@ -69,53 +72,67 @@ python3 -m cli_music_player
 ## Project Structure
 
 ```
-src/cli_music_player/
-├── __init__.py          # Version
-├── __main__.py          # CLI entry point
-├── app.py               # Main Textual app — orchestrates everything
-├── config.py            # Config management, encrypted credentials
-├── equalizer.py         # 18-band EQ with presets
-├── player.py            # mpv-based audio playback engine
-├── queue.py             # Queue, shuffle, repeat logic
-├── subsonic.py          # Navidrome/Subsonic API client
-├── utils.py             # Formatting helpers
-├── styles/
-│   └── app.tcss         # Textual CSS theme (Tokyo Night)
-└── widgets/
-    ├── browser.py       # Library browser (albums, artists, songs, etc.)
-    ├── equalizer.py     # EQ widget
-    ├── help.py          # Help/keybindings modal
-    ├── now_playing.py   # Now Playing bar + controls + seekbar
-    ├── queue_view.py    # Queue panel
-    ├── search.py        # Search modal
-    └── server_mgr.py   # Server manager modal
+src/
+├── main.rs                  # CLI entry point (clap)
+├── lib.rs                   # Module declarations
+├── utils.rs                 # Formatting helpers
+├── audio/
+│   ├── decoder.rs           # symphonia-based audio decoder
+│   ├── equalizer_dsp.rs     # 18-band biquad EQ DSP
+│   ├── output.rs            # cpal audio output
+│   ├── pipeline.rs          # Audio thread orchestrator
+│   └── resampler.rs         # Sample rate conversion (rubato)
+├── player/
+│   ├── engine.rs            # High-level playback engine
+│   └── state.rs             # Playback state types
+├── queue/
+│   └── mod.rs               # Queue, shuffle, repeat logic
+├── subsonic/
+│   ├── client.rs            # Navidrome/Subsonic API client
+│   ├── models.rs            # Song, Album, Artist, etc.
+│   ├── auth.rs              # Token+salt authentication
+│   └── error.rs             # API error types
+├── config/
+│   ├── mod.rs               # AppConfig load/save
+│   ├── models.rs            # ServerConfig, EQPreset
+│   ├── crypto.rs            # AES-GCM password encryption
+│   └── presets.rs           # Default EQ presets
+├── equalizer/
+│   └── mod.rs               # High-level EQ preset management
+└── tui/
+    ├── app.rs               # Main ratatui app — orchestrates everything
+    ├── event.rs             # Terminal event handling
+    ├── theme.rs             # Tokyo Night color palette
+    └── widgets/
+        ├── browser.rs       # Library browser (albums, artists, songs, etc.)
+        ├── equalizer.rs     # EQ widget
+        ├── help.rs          # Help/keybindings modal
+        ├── lyrics.rs        # Lyrics panel
+        ├── now_playing.rs   # Now Playing bar + controls + seekbar
+        ├── queue_view.rs    # Queue panel
+        ├── search.rs        # Search modal
+        └── server_mgr.rs   # Server manager modal
 ```
 
 ## Code Style
 
-- Python code follows standard PEP 8
-- Use type hints where practical
-- Textual widgets go in `src/cli_music_player/widgets/`
-- CSS goes in `src/cli_music_player/styles/app.tcss` for app-level styles, or in widget `DEFAULT_CSS` for widget-specific styles
-- **Important:** App-level CSS (`app.tcss`) has higher priority than widget `DEFAULT_CSS`. If you add a new widget type, make sure global styles in `app.tcss` don't conflict
+- Follow standard Rust conventions (`cargo fmt`, `cargo clippy`)
+- Use `thiserror` for error types, `anyhow` for application errors
+- TUI widgets go in `src/tui/widgets/`
+- Keep audio processing on the dedicated audio thread (see `src/audio/pipeline.rs`)
 
 ## Testing
 
-Currently the project uses manual testing and Textual's headless `run_test()` for basic smoke tests:
-
 ```bash
-source venv/bin/activate
-python3 -c "
-import asyncio
-from cli_music_player.app import MusicPlayerApp
+# Run all 293 tests
+cargo test
 
-async def test():
-    app = MusicPlayerApp()
-    async with app.run_test(size=(120, 40)) as pilot:
-        print('App renders OK')
+# Run a specific test module
+cargo test --test queue_tests
+cargo test --test equalizer_tests
 
-asyncio.run(test())
-"
+# Run with output
+cargo test -- --nocapture
 ```
 
 ## License
