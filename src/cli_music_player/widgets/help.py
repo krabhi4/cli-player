@@ -9,73 +9,73 @@ from textual.screen import ModalScreen
 from textual.widgets import Button, Static
 
 HELP_TEXT = """\
-[bold cyan]Keyboard Shortcuts[/bold cyan]
+[bold #e6edf3]Keyboard Shortcuts[/bold #e6edf3]
 
 [bold]Playback[/bold]
-  [green]Space[/green]       Play / Pause
-  [green]s[/green]           Stop
-  [green]n[/green]           Next track
-  [green]p[/green]           Previous track
-  [green]→ / ←[/green]       Seek ±5 seconds
-  [green]Shift+→/←[/green]   Seek ±30 seconds
+  [#58a6ff]Space[/#58a6ff]       Play / Pause
+  [#58a6ff]s[/#58a6ff]           Stop
+  [#58a6ff]n[/#58a6ff]           Next track
+  [#58a6ff]p[/#58a6ff]           Previous track
+  [#58a6ff]→ / ←[/#58a6ff]       Seek ±5 seconds
+  [#58a6ff]Shift+→/←[/#58a6ff]   Seek ±30 seconds
 
 [bold]Volume[/bold]
-  [green]+ / =[/green]       Volume Up
-  [green]- / _[/green]       Volume Down
-  [green]m[/green]           Mute toggle
+  [#58a6ff]+ / =[/#58a6ff]       Volume Up
+  [#58a6ff]- / _[/#58a6ff]       Volume Down
+  [#58a6ff]m[/#58a6ff]           Mute toggle
 
 [bold]Queue & Modes[/bold]
-  [green]z[/green]           Toggle Shuffle
-  [green]r[/green]           Cycle Repeat (Off → All → One)
-  [green]a[/green]           Add highlighted song to Queue
-  [green]d / Delete[/green]  Remove from Queue
-  [green]Shift+↑/↓[/green]  Reorder Queue
-  [green]c[/green]           Clear Queue
+  [#58a6ff]z[/#58a6ff]           Toggle Shuffle
+  [#58a6ff]r[/#58a6ff]           Cycle Repeat (Off → All → One)
+  [#58a6ff]a[/#58a6ff]           Add highlighted song to Queue
+  [#58a6ff]d / Delete[/#58a6ff]  Remove from Queue
+  [#58a6ff]Shift+↑/↓[/#58a6ff]  Reorder Queue
+  [#58a6ff]c[/#58a6ff]           Clear Queue
 
 [bold]Playlist[/bold]
-  [green]P[/green]           Save Queue as Playlist (name dialog)
+  [#58a6ff]P[/#58a6ff]           Save Queue as Playlist (name dialog)
                   Add songs to queue first, then press Shift+P
 
 [bold]Navigation[/bold]
-  [green]1-6[/green]         Switch tabs:
+  [#58a6ff]1-6[/#58a6ff]         Switch tabs:
                   1=Albums  2=Artists  3=Songs
                   4=Playlists  5=Genres  6=Starred
-  [green]7[/green]           Play History (songs played this session)
-  [green]Esc / Bksp[/green] Go back (previous view)
-  [green]Tab[/green]         Switch focus between panels
+  [#58a6ff]7[/#58a6ff]           Play History (songs played this session)
+  [#58a6ff]Esc / Bksp[/#58a6ff] Go back (previous view)
+  [#58a6ff]Tab[/#58a6ff]         Switch focus between panels
 
 [bold]Album Sorting[/bold]
-  [green]o[/green]           Cycle album sort order:
+  [#58a6ff]o[/#58a6ff]           Cycle album sort order:
                   Newest → Random → Frequent →
                   Recent → Starred → A-Z
 
 [bold]Starring[/bold]
-  [green]f[/green]           Star / Unstar the highlighted song
+  [#58a6ff]f[/#58a6ff]           Star / Unstar the highlighted song
                   (or the playing song if no table active)
                   View starred songs in tab 6
 
 [bold]Equalizer[/bold]
-  [green]e[/green]           Open / Close Equalizer
+  [#58a6ff]e[/#58a6ff]           Open / Close Equalizer
                   When open, first band auto-focuses:
-                  [green]←/→[/green]  Switch between bands
-                  [green]↑/↓[/green]  Adjust gain ±1 dB
-                  [green]Click[/green] Set gain by position
-                  [green]Esc[/green]  Close equalizer
+                  [#58a6ff]←/→[/#58a6ff]  Switch between bands
+                  [#58a6ff]↑/↓[/#58a6ff]  Adjust gain ±1 dB
+                  [#58a6ff]Click[/#58a6ff] Set gain by position
+                  [#58a6ff]Esc[/#58a6ff]  Close equalizer
                   Use preset dropdown and Reset/On-Off buttons
 
 [bold]Features[/bold]
-  [green]/[/green]           Search (songs, albums, artists)
-  [green]l[/green]           Toggle Lyrics panel
-  [green]R[/green]           Artist Radio (queue similar songs)
-  [green]S[/green]           Server Manager (add/switch servers)
-  [green]?[/green] or [green]i[/green]       This Help
+  [#58a6ff]/[/#58a6ff]           Search (songs, albums, artists)
+  [#58a6ff]l[/#58a6ff]           Toggle Lyrics panel
+  [#58a6ff]R[/#58a6ff]           Artist Radio (queue similar songs)
+  [#58a6ff]S[/#58a6ff]           Server Manager (add/switch servers)
+  [#58a6ff]?[/#58a6ff] or [#58a6ff]i[/#58a6ff]       This Help
 
 [bold]Artist Drill-Down[/bold]
   Click an artist → see their Top Songs + Albums
-  Press [green]Esc[/green] to go back to the full library
+  Press [#58a6ff]Esc[/#58a6ff] to go back to the full library
 
 [bold]General[/bold]
-  [green]q / Ctrl+C[/green]  Quit
+  [#58a6ff]q / Ctrl+C[/#58a6ff]  Quit
 """
 
 
@@ -91,7 +91,7 @@ class HelpModal(ModalScreen[None]):
         width: 60;
         height: 80%;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         padding: 1 2;
     }
 
@@ -107,13 +107,13 @@ class HelpModal(ModalScreen[None]):
 
     HelpModal #help-close-btn {
         min-width: 20;
-        background: #7aa2f7;
-        color: #1a1b26;
+        background: #21262d;
+        color: #e6edf3;
         text-style: bold;
     }
 
     HelpModal #help-close-btn:hover {
-        background: #7dcfff;
+        background: #30363d;
     }
     """
 

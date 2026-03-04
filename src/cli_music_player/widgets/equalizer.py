@@ -44,7 +44,7 @@ class EQBand(Widget):
     }
 
     EQBand:focus {
-        background: #414868;
+        background: #30363d;
     }
     """
 
@@ -187,7 +187,7 @@ class EqualizerWidget(Widget):
         min-height: 14;
         max-height: 24;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         padding: 0 1;
         display: none;
     }
@@ -200,7 +200,7 @@ class EqualizerWidget(Widget):
         height: 1;
         text-style: bold;
         color: $text;
-        background: $primary;
+        background: #161b22;
         text-align: center;
         padding: 0 1;
     }

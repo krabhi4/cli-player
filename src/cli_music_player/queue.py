@@ -29,9 +29,9 @@ class RepeatMode(Enum):
     @property
     def icon(self) -> str:
         return {
-            RepeatMode.OFF: "🔁",
-            RepeatMode.ALL: "🔁",
-            RepeatMode.ONE: "🔂",
+            RepeatMode.OFF: "↻",
+            RepeatMode.ALL: "↻",
+            RepeatMode.ONE: "↻1",
         }[self]
 
 

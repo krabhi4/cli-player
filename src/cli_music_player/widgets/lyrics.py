@@ -14,7 +14,7 @@ class LyricsPanel(Widget):
         width: 1fr;
         height: 1fr;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         display: none;
     }
 
@@ -24,8 +24,8 @@ class LyricsPanel(Widget):
 
     LyricsPanel .lyrics-header {
         height: 1;
-        background: $primary;
-        color: $text;
+        background: #161b22;
+        color: #e6edf3;
         text-style: bold;
         text-align: center;
         padding: 0 1;

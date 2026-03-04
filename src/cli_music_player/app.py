@@ -68,12 +68,12 @@ class SavePlaylistModal(ModalScreen[str]):
         width: 50;
         height: auto;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         padding: 1 2;
     }
     SavePlaylistModal .modal-title {
         text-style: bold;
-        color: $primary;
+        color: #58a6ff;
         text-align: center;
         width: 1fr;
         height: 1;

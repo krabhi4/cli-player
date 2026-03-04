@@ -49,12 +49,18 @@ class Player:
             "volume": self._volume,
         }
 
-        # Use ALSA directly since no PulseAudio/PipeWire
-        if self._audio_device == "auto":
-            opts["ao"] = "alsa"
+        import sys
+
+        if sys.platform == "darwin":
+            ao = "coreaudio"
         else:
-            opts["ao"] = "alsa"
-            opts["audio_device"] = f"alsa/{self._audio_device}"
+            ao = "alsa"
+
+        if self._audio_device == "auto":
+            opts["ao"] = ao
+        else:
+            opts["ao"] = ao
+            opts["audio_device"] = f"{ao}/{self._audio_device}"
 
         self._mpv = mpv.MPV(**opts)
         assert self._mpv is not None  # Type narrowing

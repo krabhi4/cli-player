@@ -22,14 +22,14 @@ class SeekBar(Widget):
     SeekBar {
         width: 1fr;
         height: 1;
-        background: #1f2335;
-        color: #7aa2f7;
+        background: #21262d;
+        color: #58a6ff;
     }
     SeekBar:hover {
-        color: #7dcfff;
+        color: #79c0ff;
     }
     SeekBar:focus {
-        color: #9ece6a;
+        color: #58a6ff;
     }
     """
 
@@ -76,20 +76,20 @@ class ControlBtn(Widget):
         min-width: 5;
         height: 1;
         background: transparent;
-        color: #c0caf5;
+        color: #e6edf3;
         padding: 0;
         margin: 0;
         content-align: center middle;
     }
     ControlBtn:hover {
-        background: #414868;
-        color: #7aa2f7;
+        background: #30363d;
+        color: #58a6ff;
     }
     ControlBtn:focus {
-        color: #9ece6a;
+        color: #58a6ff;
     }
     ControlBtn.-active {
-        color: #9ece6a;
+        color: #3fb950;
     }
     """
 
@@ -138,7 +138,7 @@ class NowPlaying(Widget):
         dock: bottom;
         height: 6;
         background: $surface;
-        border-top: solid $primary;
+        border-top: round #30363d;
         padding: 0 1;
     }
 
@@ -208,7 +208,7 @@ class NowPlaying(Widget):
     }
 
     NowPlaying .np-server:hover {
-        color: #7aa2f7;
+        color: #58a6ff;
         text-style: underline;
     }
 
@@ -219,7 +219,7 @@ class NowPlaying(Widget):
     NowPlaying .ctrl-sep {
         width: 3;
         height: 1;
-        color: #414868;
+        color: #30363d;
     }
     """
 
@@ -240,7 +240,7 @@ class NowPlaying(Widget):
     def compose(self) -> ComposeResult:
         # Row 1: Track info
         with Horizontal(classes="np-row1"):
-            yield Static("⏹", id="np-state", classes="np-state")
+            yield Static("■", id="np-state", classes="np-state")
             yield Static("No track playing", id="np-title", classes="np-title")
             yield Static("", id="np-artist", classes="np-artist")
         # Row 2: Seekbar + time
@@ -249,15 +249,15 @@ class NowPlaying(Widget):
             yield Static("0:00 / 0:00", id="np-time", classes="np-progress-text")
         # Row 3: Playback controls + volume
         with Horizontal(classes="np-row3"):
-            yield ControlBtn("⏮", "prev_track", id="btn-prev")
-            yield ControlBtn("⏯", "toggle_pause", id="btn-pause")
-            yield ControlBtn("⏭", "next_track", id="btn-next")
+            yield ControlBtn("◁◁", "prev_track", id="btn-prev")
+            yield ControlBtn("▶", "toggle_pause", id="btn-pause")
+            yield ControlBtn("▷▷", "next_track", id="btn-next")
             yield Static(" │ ", classes="ctrl-sep")
-            yield ControlBtn("🔀", "toggle_shuffle", id="btn-shuffle")
-            yield ControlBtn("🎛", "toggle_eq", id="btn-eq")
-            yield ControlBtn("\u2139", "show_help", id="btn-info")
+            yield ControlBtn("⇌", "toggle_shuffle", id="btn-shuffle")
+            yield ControlBtn("EQ", "toggle_eq", id="btn-eq")
+            yield ControlBtn("?", "show_help", id="btn-info")
             yield Static("", classes="np-spacer")
-            yield Static("🔊 75%", id="np-volume", classes="np-volume")
+            yield Static("♪ 75%", id="np-volume", classes="np-volume")
         # Row 4: Modes + server (server name is clickable)
         with Horizontal(classes="np-row4"):
             yield Static("", id="np-modes", classes="np-modes")
@@ -271,8 +271,8 @@ class NowPlaying(Widget):
             self.watch_server_name(self.server_name)
 
     def _get_state_icon(self) -> str:
-        icons = {"playing": "▶", "paused": "⏸", "stopped": "⏹"}
-        return icons.get(self.state, "⏹")
+        icons = {"playing": "▶", "paused": "‖", "stopped": "■"}
+        return icons.get(self.state, "■")
 
     # ─── Watchers ────────────────────────────────────────
 
@@ -312,7 +312,7 @@ class NowPlaying(Widget):
         try:
             self.query_one("#np-state", Static).update(self._get_state_icon())
             btn = self.query_one("#btn-pause", ControlBtn)
-            btn.label = "⏸" if value == "playing" else "▶"
+            btn.label = "‖" if value == "playing" else "▶"
         except Exception:
             pass
 
@@ -320,10 +320,9 @@ class NowPlaying(Widget):
         try:
             vol_w = self.query_one("#np-volume", Static)
             if self.muted:
-                vol_w.update(f"🔇 {value}%")
+                vol_w.update(f"× {value}%")
             else:
-                icon = "🔊" if value > 50 else "🔉" if value > 0 else "🔈"
-                vol_w.update(f"{icon} {value}%")
+                vol_w.update(f"♪ {value}%")
         except Exception:
             pass
 
@@ -347,7 +346,7 @@ class NowPlaying(Widget):
     def watch_server_name(self, value: str) -> None:
         try:
             server_w = self.query_one("#np-server", ControlBtn)
-            server_w.label = f"🖥 {value}" if value else ""
+            server_w.label = f"@ {value}" if value else ""
         except Exception:
             pass
 
@@ -356,8 +355,8 @@ class NowPlaying(Widget):
             modes_w = self.query_one("#np-modes", Static)
             parts = []
             if self.shuffle_on:
-                parts.append("🔀 Shuffle")
-            repeat_icons = {"Off": "", "All": "🔁 Repeat", "One": "🔂 Repeat 1"}
+                parts.append("⇌ Shuffle")
+            repeat_icons = {"Off": "", "All": "↻ Repeat", "One": "↻1 Repeat 1"}
             r = repeat_icons.get(self.repeat_mode, "")
             if r:
                 parts.append(r)

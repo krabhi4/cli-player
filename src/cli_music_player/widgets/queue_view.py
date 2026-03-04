@@ -42,14 +42,14 @@ class QueueView(Widget):
     QueueView {
         width: 35;
         height: 1fr;
-        border-left: solid $primary;
+        border-left: round #30363d;
         background: $surface;
     }
 
     QueueView .queue-header {
         height: 1;
-        background: $primary;
-        color: $text;
+        background: #161b22;
+        color: #e6edf3;
         text-style: bold;
         padding: 0 1;
         text-align: center;
@@ -67,8 +67,8 @@ class QueueView(Widget):
     }
 
     QueueView DataTable > .datatable--cursor {
-        background: $primary;
-        color: $text;
+        background: #1f6feb;
+        color: #e6edf3;
     }
     """
 

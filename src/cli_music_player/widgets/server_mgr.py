@@ -34,7 +34,7 @@ class ServerManagerModal(ModalScreen[int | None]):
         max-width: 90;
         height: 80%;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         padding: 1;
     }
 
@@ -54,7 +54,7 @@ class ServerManagerModal(ModalScreen[int | None]):
 
     ServerManagerModal .sm-form-title {
         text-style: bold;
-        color: $primary;
+        color: #e6edf3;
         height: 1;
         margin-bottom: 1;
     }
@@ -89,7 +89,7 @@ class ServerManagerModal(ModalScreen[int | None]):
 
     def compose(self) -> ComposeResult:
         with Vertical():
-            yield Static("🖥 Server Manager", classes="sm-title")
+            yield Static("Server Manager", classes="sm-title")
 
             # Server list
             yield DataTable(id="server-list")

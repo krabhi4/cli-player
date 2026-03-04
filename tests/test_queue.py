@@ -36,9 +36,9 @@ class TestRepeatMode(unittest.TestCase):
 
     def test_repeat_mode_icons(self):
         """Test repeat mode icons"""
-        self.assertEqual(RepeatMode.OFF.icon, "🔁")
-        self.assertEqual(RepeatMode.ALL.icon, "🔁")
-        self.assertEqual(RepeatMode.ONE.icon, "🔂")
+        self.assertEqual(RepeatMode.OFF.icon, "↻")
+        self.assertEqual(RepeatMode.ALL.icon, "↻")
+        self.assertEqual(RepeatMode.ONE.icon, "↻1")
 
 
 class TestQueueManager(unittest.TestCase):

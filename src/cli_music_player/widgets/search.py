@@ -41,7 +41,7 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
         max-width: 100;
         height: 80%;
         background: $surface;
-        border: solid $primary;
+        border: round #30363d;
         padding: 1;
     }
 
@@ -62,15 +62,15 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
         min-width: 10;
         height: 1;
         border: none;
-        background: #f7768e;
-        color: #1a1b26;
+        background: #21262d;
+        color: #e6edf3;
         text-style: bold;
         padding: 0;
         margin: 0;
     }
 
     SearchModal #search-close-btn:hover {
-        background: #ff9e9e;
+        background: #30363d;
     }
 
     SearchModal Input {
@@ -100,7 +100,7 @@ class SearchModal(ModalScreen[Song | Album | Artist | None]):
     def compose(self) -> ComposeResult:
         with Vertical():
             with Horizontal(classes="search-header"):
-                yield Static("🔍 Search Library", classes="search-title")
+                yield Static("/ Search Library", classes="search-title")
                 yield Button("✕ Close", id="search-close-btn")
             yield Input(placeholder="Type to search…", id="search-input")
             yield Static(
