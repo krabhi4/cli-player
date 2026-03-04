@@ -3,16 +3,20 @@ use std::io;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
-use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind};
-use crossterm::terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen};
 use crossterm::event::{DisableMouseCapture, EnableMouseCapture};
+use crossterm::event::{
+    KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
+};
 use crossterm::execute;
+use crossterm::terminal::{
+    EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
+};
+use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::Style;
 use ratatui::text::Span;
 use ratatui::widgets::Paragraph;
-use ratatui::Terminal;
 
 use crate::audio::pipeline::AudioEvent;
 use crate::config::AppConfig;
@@ -22,7 +26,9 @@ use crate::queue::{QueueManager, RepeatMode};
 use crate::subsonic::{Album, Artist, Genre, Playlist, Song, SubsonicClient};
 use crate::tui::event::{AppEvent, EventHandler};
 use crate::tui::theme;
-use crate::tui::widgets::{browser, equalizer, help, lyrics, now_playing, queue_view, search, server_mgr};
+use crate::tui::widgets::{
+    browser, equalizer, help, lyrics, now_playing, queue_view, search, server_mgr,
+};
 
 const ALBUM_SORT_TYPES: &[&str] = &[
     "newest",
@@ -239,7 +245,11 @@ impl App {
         self.config.save();
 
         disable_raw_mode()?;
-        execute!(terminal.backend_mut(), LeaveAlternateScreen, DisableMouseCapture)?;
+        execute!(
+            terminal.backend_mut(),
+            LeaveAlternateScreen,
+            DisableMouseCapture
+        )?;
         terminal.show_cursor()?;
 
         Ok(())
@@ -275,7 +285,7 @@ impl App {
         let area = f.area();
 
         let main_layout = Layout::vertical([
-            Constraint::Length(1),  // Header/tabs
+            Constraint::Length(1), // Header/tabs
             Constraint::Min(1),    // Content
             Constraint::Length(4), // Now playing
             Constraint::Length(1), // Status bar
@@ -287,20 +297,14 @@ impl App {
         browser::render_tabs(f, main_layout[0], self.active_tab);
 
         // Content area: browser + optional queue sidebar
-        let content_layout = Layout::horizontal([
-            Constraint::Min(1),
-            Constraint::Length(35),
-        ])
-        .split(main_layout[1]);
+        let content_layout =
+            Layout::horizontal([Constraint::Min(1), Constraint::Length(35)]).split(main_layout[1]);
         self.layout_queue_area = content_layout[1];
 
         // Browser content based on active tab
         let browser_area = if self.lyrics_visible {
-            let lr = Layout::horizontal([
-                Constraint::Percentage(60),
-                Constraint::Percentage(40),
-            ])
-            .split(content_layout[0]);
+            let lr = Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)])
+                .split(content_layout[0]);
 
             // Lyrics panel
             let (title, artist) = self
@@ -309,7 +313,14 @@ impl App {
                 .as_ref()
                 .map(|s| (s.title.as_str(), s.artist.as_str()))
                 .unwrap_or(("", ""));
-            lyrics::render(f, lr[1], title, artist, &self.lyrics_text, self.lyrics_scroll);
+            lyrics::render(
+                f,
+                lr[1],
+                title,
+                artist,
+                &self.lyrics_text,
+                self.lyrics_scroll,
+            );
             lr[0]
         } else {
             content_layout[0]
@@ -476,7 +487,10 @@ impl App {
                     return;
                 }
                 ModalKind::Help => {
-                    if matches!(key.code, KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('?') | KeyCode::Char('i')) {
+                    if matches!(
+                        key.code,
+                        KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('?') | KeyCode::Char('i')
+                    ) {
                         self.active_modal = None;
                     }
                     return;
@@ -532,8 +546,11 @@ impl App {
                             (idx + 1) % presets.len()
                         };
                         let next_name = presets[next_idx].name.clone();
-                        self.equalizer_state
-                            .load_preset(&next_name, &mut self.config, &mut self.player);
+                        self.equalizer_state.load_preset(
+                            &next_name,
+                            &mut self.config,
+                            &mut self.player,
+                        );
                     }
                     return;
                 }
@@ -560,12 +577,8 @@ impl App {
             KeyCode::Char('s') => self.player.stop(),
 
             // Seek
-            KeyCode::Right if key.modifiers.contains(KeyModifiers::SHIFT) => {
-                self.player.seek(30.0)
-            }
-            KeyCode::Left if key.modifiers.contains(KeyModifiers::SHIFT) => {
-                self.player.seek(-30.0)
-            }
+            KeyCode::Right if key.modifiers.contains(KeyModifiers::SHIFT) => self.player.seek(30.0),
+            KeyCode::Left if key.modifiers.contains(KeyModifiers::SHIFT) => self.player.seek(-30.0),
             KeyCode::Right => self.player.seek(5.0),
             KeyCode::Left => self.player.seek(-5.0),
 
@@ -739,8 +752,7 @@ impl App {
                 let bar_start = np.x + 8;
                 let bar_end = np.x + np.width.saturating_sub(8);
                 if col >= bar_start && col <= bar_end && bar_end > bar_start {
-                    let proportion =
-                        (col - bar_start) as f64 / (bar_end - bar_start) as f64;
+                    let proportion = (col - bar_start) as f64 / (bar_end - bar_start) as f64;
                     let seek_pos = proportion * self.player.duration;
                     self.player.seek_to(seek_pos);
                 }
@@ -941,7 +953,8 @@ impl App {
                         if idx < self.albums.len() {
                             let album_id = self.albums[idx].id.clone();
                             if let Some(client) = &self.client
-                                && let Ok((_, songs)) = self.rt.block_on(client.get_album(&album_id))
+                                && let Ok((_, songs)) =
+                                    self.rt.block_on(client.get_album(&album_id))
                             {
                                 self.push_nav();
                                 self.songs = songs;
@@ -954,7 +967,8 @@ impl App {
                         if idx < self.artists.len() {
                             let artist_id = self.artists[idx].id.clone();
                             if let Some(client) = &self.client
-                                && let Ok((_, albums)) = self.rt.block_on(client.get_artist(&artist_id))
+                                && let Ok((_, albums)) =
+                                    self.rt.block_on(client.get_artist(&artist_id))
                             {
                                 self.push_nav();
                                 self.albums = albums;
@@ -982,7 +996,8 @@ impl App {
                         if idx < self.playlists.len() {
                             let pl_id = self.playlists[idx].id.clone();
                             if let Some(client) = &self.client
-                                && let Ok((_, songs)) = self.rt.block_on(client.get_playlist(&pl_id))
+                                && let Ok((_, songs)) =
+                                    self.rt.block_on(client.get_playlist(&pl_id))
                             {
                                 self.push_nav();
                                 self.songs = songs;
@@ -995,7 +1010,8 @@ impl App {
                         if idx < self.genres.len() {
                             let genre = self.genres[idx].name.clone();
                             if let Some(client) = &self.client
-                                && let Ok(songs) = self.rt.block_on(client.get_songs_by_genre(&genre, 50, 0))
+                                && let Ok(songs) =
+                                    self.rt.block_on(client.get_songs_by_genre(&genre, 50, 0))
                             {
                                 self.push_nav();
                                 self.songs = songs;
@@ -1213,7 +1229,8 @@ impl App {
     fn do_search(&mut self) {
         if let Some(client) = &self.client
             && let Ok((artists, albums, songs)) =
-                self.rt.block_on(client.search(&self.search_query, 10, 10, 20))
+                self.rt
+                    .block_on(client.search(&self.search_query, 10, 10, 20))
         {
             self.search_artists = artists;
             self.search_albums = albums;
@@ -1318,8 +1335,7 @@ impl App {
                 let username = self.server_form[2].clone();
                 let password = self.server_form[3].clone();
 
-                if name.is_empty() || url.is_empty() || username.is_empty() || password.is_empty()
-                {
+                if name.is_empty() || url.is_empty() || username.is_empty() || password.is_empty() {
                     self.server_status = "All fields are required".to_string();
                     return;
                 }
@@ -1333,8 +1349,7 @@ impl App {
                         self.load_library_data();
                         self.server_form = Default::default();
                         self.server_status = format!("Server '{name}' added successfully");
-                        self.server_selected =
-                            Some(self.config.servers.len().saturating_sub(1));
+                        self.server_selected = Some(self.config.servers.len().saturating_sub(1));
                     }
                     _ => {
                         self.server_status =

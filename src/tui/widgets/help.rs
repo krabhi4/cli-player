@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::Rect;
 use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Wrap};
-use ratatui::Frame;
 
 use crate::tui::theme;
 
@@ -28,18 +28,12 @@ pub fn render(f: &mut Frame, area: Rect) {
         Line::from("  →/←       Seek ±5s"),
         Line::from("  Shift+→/← Seek ±30s"),
         Line::from(""),
-        Line::from(Span::styled(
-            "Volume",
-            Style::default().fg(theme::PRIMARY),
-        )),
+        Line::from(Span::styled("Volume", Style::default().fg(theme::PRIMARY))),
         Line::from("  +/=       Volume up"),
         Line::from("  -/_       Volume down"),
         Line::from("  m         Mute toggle"),
         Line::from(""),
-        Line::from(Span::styled(
-            "Queue",
-            Style::default().fg(theme::PRIMARY),
-        )),
+        Line::from(Span::styled("Queue", Style::default().fg(theme::PRIMARY))),
         Line::from("  a         Add to queue"),
         Line::from("  d/Delete  Remove from queue"),
         Line::from("  c         Clear queue"),
@@ -57,10 +51,7 @@ pub fn render(f: &mut Frame, area: Rect) {
         Line::from("  Esc/Bksp  Go back"),
         Line::from("  /         Search"),
         Line::from(""),
-        Line::from(Span::styled(
-            "Other",
-            Style::default().fg(theme::PRIMARY),
-        )),
+        Line::from(Span::styled("Other", Style::default().fg(theme::PRIMARY))),
         Line::from("  e         Toggle equalizer"),
         Line::from("  l         Toggle lyrics"),
         Line::from("  f         Star/unstar"),

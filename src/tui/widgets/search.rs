@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table, Tabs};
-use ratatui::Frame;
 
 use crate::subsonic::{Album, Artist, Song};
 use crate::tui::theme;
@@ -32,7 +32,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &SearchState) {
     let chunks = Layout::vertical([
         Constraint::Length(1), // Input
         Constraint::Length(1), // Tabs
-        Constraint::Min(1),   // Results
+        Constraint::Min(1),    // Results
     ])
     .split(inner);
 
@@ -62,9 +62,7 @@ pub fn render(f: &mut Frame, area: Rect, state: &SearchState) {
         })
         .collect();
 
-    let tabs = Tabs::new(titles)
-        .select(state.active_tab)
-        .divider(" │ ");
+    let tabs = Tabs::new(titles).select(state.active_tab).divider(" │ ");
     f.render_widget(tabs, chunks[1]);
 
     // Results
@@ -86,8 +84,8 @@ pub fn render(f: &mut Frame, area: Rect, state: &SearchState) {
                 Constraint::Percentage(35),
                 Constraint::Length(6),
             ];
-            let table = Table::new(rows, widths)
-                .row_highlight_style(Style::default().bg(theme::CURSOR_BG));
+            let table =
+                Table::new(rows, widths).row_highlight_style(Style::default().bg(theme::CURSOR_BG));
             let mut tstate = ratatui::widgets::TableState::default();
             tstate.select(state.selected);
             f.render_stateful_widget(table, chunks[2], &mut tstate);
@@ -104,8 +102,8 @@ pub fn render(f: &mut Frame, area: Rect, state: &SearchState) {
                 })
                 .collect();
             let widths = [Constraint::Percentage(50), Constraint::Percentage(40)];
-            let table = Table::new(rows, widths)
-                .row_highlight_style(Style::default().bg(theme::CURSOR_BG));
+            let table =
+                Table::new(rows, widths).row_highlight_style(Style::default().bg(theme::CURSOR_BG));
             let mut tstate = ratatui::widgets::TableState::default();
             tstate.select(state.selected);
             f.render_stateful_widget(table, chunks[2], &mut tstate);
@@ -117,8 +115,8 @@ pub fn render(f: &mut Frame, area: Rect, state: &SearchState) {
                 .map(|a| Row::new(vec![Cell::from(a.name.as_str())]))
                 .collect();
             let widths = [Constraint::Percentage(80)];
-            let table = Table::new(rows, widths)
-                .row_highlight_style(Style::default().bg(theme::CURSOR_BG));
+            let table =
+                Table::new(rows, widths).row_highlight_style(Style::default().bg(theme::CURSOR_BG));
             let mut tstate = ratatui::widgets::TableState::default();
             tstate.select(state.selected);
             f.render_stateful_widget(table, chunks[2], &mut tstate);

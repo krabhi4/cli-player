@@ -1,6 +1,6 @@
-use cli_music_player::audio::equalizer_dsp::{EqualizerDsp, EQ_FREQUENCIES};
+use cli_music_player::audio::equalizer_dsp::{EQ_FREQUENCIES, EqualizerDsp};
 use cli_music_player::config::presets::default_eq_presets;
-use cli_music_player::equalizer::{EQ_BANDS, EQ_BAND_LABELS, GAIN_MAX, GAIN_MIN};
+use cli_music_player::equalizer::{EQ_BAND_LABELS, EQ_BANDS, GAIN_MAX, GAIN_MIN};
 
 // ── Constants Tests ─────────────────────────────────────────────
 
@@ -727,7 +727,10 @@ fn test_dsp_set_gains_from_boost_to_flat_stops_processing() {
     dsp.process(&mut flat_output);
 
     // With all-zero gains, process returns immediately — signal unchanged
-    assert_eq!(flat_output, signal, "Flat gains should pass signal through unchanged");
+    assert_eq!(
+        flat_output, signal,
+        "Flat gains should pass signal through unchanged"
+    );
 }
 
 #[test]
@@ -776,10 +779,13 @@ fn test_dsp_update_coefficients_matches_rebuild_steady_state() {
     let mut dsp_update = EqualizerDsp::new(44100, 1);
     let mut dsp_rebuild = EqualizerDsp::new(44100, 1);
 
-    let gains = [3.0, -2.0, 5.0, 0.0, -4.0, 6.0, 1.0, -1.0, 8.0, -3.0, 2.0, -5.0, 7.0, 0.0, -6.0, 4.0, -2.0, 9.0];
+    let gains = [
+        3.0, -2.0, 5.0, 0.0, -4.0, 6.0, 1.0, -1.0, 8.0, -3.0, 2.0, -5.0, 7.0, 0.0, -6.0, 4.0, -2.0,
+        9.0,
+    ];
 
     // Both start fresh, so both paths go through the same coefficient calc
-    dsp_update.set_gains(&gains);  // in-place update (filters already exist)
+    dsp_update.set_gains(&gains); // in-place update (filters already exist)
     dsp_rebuild.set_gains(&gains); // same path
 
     let signal: Vec<f32> = (0..4410)

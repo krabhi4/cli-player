@@ -10,12 +10,7 @@ pub struct Resampler {
 }
 
 impl Resampler {
-    pub fn new(
-        from_rate: u32,
-        to_rate: u32,
-        channels: usize,
-        chunk_size: usize,
-    ) -> Result<Self> {
+    pub fn new(from_rate: u32, to_rate: u32, channels: usize, chunk_size: usize) -> Result<Self> {
         let resampler =
             FftFixedInOut::new(from_rate as usize, to_rate as usize, chunk_size, channels)
                 .context("Failed to create resampler")?;

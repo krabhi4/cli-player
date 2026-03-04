@@ -153,8 +153,7 @@ fn audio_thread(
                                     let out_rate = out.sample_rate;
                                     out_channels = out.channels as usize;
 
-                                    let mut dsp =
-                                        EqualizerDsp::new(dec_rate, dec_channels);
+                                    let mut dsp = EqualizerDsp::new(dec_rate, dec_channels);
                                     dsp.set_gains(&eq_gains);
                                     dsp.set_enabled(eq_enabled);
 
@@ -162,31 +161,27 @@ fn audio_thread(
                                     // Resampler operates on output channel count
                                     // (channel conversion happens before resampling)
                                     if dec_rate != out_rate {
-                                        match Resampler::new(
-                                            dec_rate,
-                                            out_rate,
-                                            out_channels,
-                                            1024,
-                                        ) {
+                                        match Resampler::new(dec_rate, out_rate, out_channels, 1024)
+                                        {
                                             Ok(r) => resampler = Some(r),
                                             Err(e) => {
-                                                let _ = event_tx.send(AudioEvent::Error(
-                                                    format!("Resampler init failed: {e}"),
-                                                ));
+                                                let _ = event_tx.send(AudioEvent::Error(format!(
+                                                    "Resampler init failed: {e}"
+                                                )));
                                             }
                                         }
                                     }
 
                                     // Set initial volume/mute on the new output
-                                    out.volume.store(volume, std::sync::atomic::Ordering::Relaxed);
+                                    out.volume
+                                        .store(volume, std::sync::atomic::Ordering::Relaxed);
                                     out.muted.store(muted, std::sync::atomic::Ordering::Relaxed);
 
                                     eq_dsp = Some(dsp);
                                     output = Some(out);
                                     decoder = Some(dec);
                                     state = PlaybackState::Playing;
-                                    let _ =
-                                        event_tx.send(AudioEvent::StateChange(state));
+                                    let _ = event_tx.send(AudioEvent::StateChange(state));
                                 }
                                 Err(e) => {
                                     let _ = event_tx.send(AudioEvent::Error(format!(
@@ -196,8 +191,7 @@ fn audio_thread(
                             }
                         }
                         Err(e) => {
-                            let _ = event_tx
-                                .send(AudioEvent::Error(format!("Decode failed: {e}")));
+                            let _ = event_tx.send(AudioEvent::Error(format!("Decode failed: {e}")));
                         }
                     }
                 }
@@ -215,7 +209,8 @@ fn audio_thread(
                     if state == PlaybackState::Paused {
                         state = PlaybackState::Playing;
                         if let Some(out) = &output {
-                            out.paused.store(false, std::sync::atomic::Ordering::Relaxed);
+                            out.paused
+                                .store(false, std::sync::atomic::Ordering::Relaxed);
                         }
                         let _ = event_tx.send(AudioEvent::StateChange(state));
                     }
@@ -301,9 +296,8 @@ fn audio_thread(
                             match rs.process(&samples) {
                                 Ok(resampled) => resampled,
                                 Err(e) => {
-                                    let _ = event_tx.send(AudioEvent::Error(
-                                        format!("Resample error: {e}"),
-                                    ));
+                                    let _ = event_tx
+                                        .send(AudioEvent::Error(format!("Resample error: {e}")));
                                     continue;
                                 }
                             }
@@ -318,13 +312,10 @@ fn audio_thread(
 
                         // Periodic position update (~10 Hz)
                         if last_position_update.elapsed() >= Duration::from_millis(100) {
-                            let position =
-                                total_frames_decoded as f64 / dec.sample_rate() as f64;
+                            let position = total_frames_decoded as f64 / dec.sample_rate() as f64;
                             let duration = dec.duration_secs().unwrap_or(0.0);
-                            let _ = event_tx.send(AudioEvent::PositionUpdate {
-                                position,
-                                duration,
-                            });
+                            let _ =
+                                event_tx.send(AudioEvent::PositionUpdate { position, duration });
                             last_position_update = Instant::now();
                         }
                     }

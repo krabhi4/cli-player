@@ -2,8 +2,8 @@ use std::f64::consts::PI;
 
 /// 18-band EQ frequencies in Hz.
 pub const EQ_FREQUENCIES: [f64; 18] = [
-    65.0, 92.0, 131.0, 185.0, 262.0, 370.0, 523.0, 740.0, 1047.0, 1480.0, 2093.0, 2960.0,
-    4186.0, 5920.0, 8372.0, 11840.0, 16744.0, 20000.0,
+    65.0, 92.0, 131.0, 185.0, 262.0, 370.0, 523.0, 740.0, 1047.0, 1480.0, 2093.0, 2960.0, 4186.0,
+    5920.0, 8372.0, 11840.0, 16744.0, 20000.0,
 ];
 
 /// A second-order biquad filter using Direct Form I.
@@ -52,8 +52,9 @@ impl BiquadFilter {
 
     /// Process a single sample through the filter.
     fn process(&mut self, input: f64) -> f64 {
-        let output =
-            self.b0 * input + self.b1 * self.x1 + self.b2 * self.x2 - self.a1 * self.y1 - self.a2 * self.y2;
+        let output = self.b0 * input + self.b1 * self.x1 + self.b2 * self.x2
+            - self.a1 * self.y1
+            - self.a2 * self.y2;
         self.x2 = self.x1;
         self.x1 = input;
         self.y2 = self.y1;

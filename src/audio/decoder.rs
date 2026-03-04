@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use anyhow::{Context, Result};
 use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{Decoder, DecoderOptions, CODEC_TYPE_NULL};
+use symphonia::core::codecs::{CODEC_TYPE_NULL, Decoder, DecoderOptions};
 use symphonia::core::formats::{FormatOptions, FormatReader, SeekMode, SeekTo};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
@@ -95,14 +95,11 @@ impl AudioDecoder {
         let codec_params = &track.codec_params;
 
         let sample_rate = codec_params.sample_rate.unwrap_or(44100);
-        let channels = codec_params
-            .channels
-            .map(|c| c.count())
-            .unwrap_or(2);
+        let channels = codec_params.channels.map(|c| c.count()).unwrap_or(2);
 
-        let duration_secs = codec_params.n_frames.map(|frames| {
-            frames as f64 / sample_rate as f64
-        });
+        let duration_secs = codec_params
+            .n_frames
+            .map(|frames| frames as f64 / sample_rate as f64);
 
         let decoder = symphonia::default::get_codecs()
             .make(codec_params, &DecoderOptions::default())

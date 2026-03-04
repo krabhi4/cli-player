@@ -1,11 +1,11 @@
-use crate::config::models::EQPreset;
 use crate::config::AppConfig;
+use crate::config::models::EQPreset;
 use crate::player::Player;
 
 /// 18-band EQ frequencies in Hz.
 pub const EQ_BANDS: [u32; 18] = [
-    65, 92, 131, 185, 262, 370, 523, 740, 1047, 1480, 2093, 2960, 4186, 5920, 8372, 11840,
-    16744, 20000,
+    65, 92, 131, 185, 262, 370, 523, 740, 1047, 1480, 2093, 2960, 4186, 5920, 8372, 11840, 16744,
+    20000,
 ];
 
 pub const EQ_BAND_LABELS: [&str; 18] = [
@@ -97,10 +97,6 @@ impl Equalizer {
     }
 
     pub fn band_frequency(index: usize) -> u32 {
-        if index < 18 {
-            EQ_BANDS[index]
-        } else {
-            0
-        }
+        if index < 18 { EQ_BANDS[index] } else { 0 }
     }
 }

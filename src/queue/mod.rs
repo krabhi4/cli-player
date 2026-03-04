@@ -1,5 +1,5 @@
-use rand::seq::SliceRandom;
 use rand::Rng;
+use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 
 use crate::subsonic::Song;

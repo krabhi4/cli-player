@@ -1,7 +1,7 @@
+use cli_music_player::config::AppConfig;
 use cli_music_player::config::crypto::{decrypt_password, encrypt_password};
 use cli_music_player::config::models::{EQPreset, ServerConfig};
 use cli_music_player::config::presets::default_eq_presets;
-use cli_music_player::config::AppConfig;
 use serde_json::json;
 use tempfile::tempdir;
 
@@ -296,8 +296,10 @@ fn test_app_config_custom_eq_gains_persist() {
 
     {
         let mut config = AppConfig::load_from(dir.path());
-        config.custom_eq_gains = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0,
-                                       10.0, 11.0, 12.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        config.custom_eq_gains = vec![
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 1.0, 2.0, 3.0, 4.0, 5.0,
+            6.0,
+        ];
         config.save();
     }
 
@@ -395,7 +397,11 @@ fn test_app_config_overwrite_custom_preset() {
     let preset = config.get_eq_preset("My EQ").unwrap();
     assert_eq!(preset.gains[0], 7.0);
     // Should not have duplicates
-    let count = config.eq_presets.iter().filter(|p| p.name == "My EQ").count();
+    let count = config
+        .eq_presets
+        .iter()
+        .filter(|p| p.name == "My EQ")
+        .count();
     assert_eq!(count, 1);
 }
 
@@ -494,11 +500,7 @@ fn test_app_config_empty_json_file() {
 #[test]
 fn test_app_config_partial_json() {
     let dir = tempdir().unwrap();
-    std::fs::write(
-        dir.path().join("config.json"),
-        r#"{"volume": 42}"#,
-    )
-    .unwrap();
+    std::fs::write(dir.path().join("config.json"), r#"{"volume": 42}"#).unwrap();
 
     let config = AppConfig::load_from(dir.path());
     assert_eq!(config.volume, 42);
@@ -569,10 +571,7 @@ fn test_app_config_many_custom_presets_persist() {
     {
         let mut config = AppConfig::load_from(dir.path());
         for i in 0..50 {
-            config.save_custom_eq_preset(
-                &format!("Custom {i}"),
-                &vec![(i as f64) % 12.0; 18],
-            );
+            config.save_custom_eq_preset(&format!("Custom {i}"), &vec![(i as f64) % 12.0; 18]);
         }
         config.save();
     }

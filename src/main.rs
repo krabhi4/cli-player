@@ -5,7 +5,11 @@ use cli_music_player::config::AppConfig;
 use cli_music_player::tui::app::App;
 
 #[derive(Parser)]
-#[command(name = "cli-music-player", version, about = "TUI music player for Navidrome")]
+#[command(
+    name = "cli-music-player",
+    version,
+    about = "TUI music player for Navidrome"
+)]
 struct Cli {
     /// Override config directory path
     #[arg(long)]

@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::Span;
 use ratatui::widgets::{Block, Borders, Cell, Row, Table, Tabs};
-use ratatui::Frame;
 
 use crate::subsonic::{Album, Artist, Genre, Playlist, Song};
 use crate::tui::theme;
@@ -43,12 +43,7 @@ pub fn render_tabs(f: &mut Frame, area: Rect, active_tab: usize) {
     f.render_widget(tabs, area);
 }
 
-pub fn render_albums_table(
-    f: &mut Frame,
-    area: Rect,
-    albums: &[Album],
-    selected: Option<usize>,
-) {
+pub fn render_albums_table(f: &mut Frame, area: Rect, albums: &[Album], selected: Option<usize>) {
     let rows: Vec<Row> = albums
         .iter()
         .map(|a| {
@@ -79,11 +74,7 @@ pub fn render_albums_table(
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);
@@ -115,23 +106,14 @@ pub fn render_artists_table(
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);
     f.render_stateful_widget(table, area, &mut state);
 }
 
-pub fn render_songs_table(
-    f: &mut Frame,
-    area: Rect,
-    songs: &[Song],
-    selected: Option<usize>,
-) {
+pub fn render_songs_table(f: &mut Frame, area: Rect, songs: &[Song], selected: Option<usize>) {
     let rows: Vec<Row> = songs
         .iter()
         .enumerate()
@@ -161,11 +143,7 @@ pub fn render_songs_table(
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);
@@ -202,23 +180,14 @@ pub fn render_playlists_table(
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);
     f.render_stateful_widget(table, area, &mut state);
 }
 
-pub fn render_genres_table(
-    f: &mut Frame,
-    area: Rect,
-    genres: &[Genre],
-    selected: Option<usize>,
-) {
+pub fn render_genres_table(f: &mut Frame, area: Rect, genres: &[Genre], selected: Option<usize>) {
     let rows: Vec<Row> = genres
         .iter()
         .map(|g| {
@@ -243,11 +212,7 @@ pub fn render_genres_table(
     let table = Table::new(rows, widths)
         .header(header)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);

@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph};
-use ratatui::Frame;
 
 use crate::player::PlaybackState;
 use crate::queue::RepeatMode;
@@ -100,14 +100,8 @@ pub fn render(f: &mut Frame, area: Rect, np: &NowPlayingState) {
             format!(" {} ", utils::format_duration(pos_secs)),
             Style::default().fg(theme::TEXT),
         ),
-        Span::styled(
-            "━".repeat(filled),
-            Style::default().fg(theme::PRIMARY),
-        ),
-        Span::styled(
-            "╌".repeat(empty),
-            Style::default().fg(theme::BORDER),
-        ),
+        Span::styled("━".repeat(filled), Style::default().fg(theme::PRIMARY)),
+        Span::styled("╌".repeat(empty), Style::default().fg(theme::BORDER)),
         Span::styled(
             format!(" {} ", utils::format_duration(dur_secs)),
             Style::default().fg(theme::TEXT_MUTED),
@@ -141,10 +135,7 @@ pub fn render(f: &mut Frame, area: Rect, np: &NowPlayingState) {
     };
 
     // Build left side: " ◁◁ ▶ ▷▷ │  ⇌ EQ │ ♪ xx%"
-    let left_text = format!(
-        " ◁◁ {} ▷▷ │ ",
-        state_icon,
-    );
+    let left_text = format!(" ◁◁ {} ▷▷ │ ", state_icon,);
     let shuffle_str = " ⇌ ";
     let eq_str = "EQ ";
     let vol_part = format!("│ {vol_str}");

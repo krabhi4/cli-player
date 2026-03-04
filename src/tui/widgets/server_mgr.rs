@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Cell, Clear, Paragraph, Row, Table};
-use ratatui::Frame;
 
 use crate::config::models::ServerConfig;
 use crate::tui::theme;
@@ -144,7 +144,10 @@ pub fn render(f: &mut Frame, area: Rect, state: &ServerMgrState) {
         };
 
         let line = Line::from(vec![
-            Span::styled(format!(" {label:<10}"), Style::default().fg(theme::TEXT_MUTED)),
+            Span::styled(
+                format!(" {label:<10}"),
+                Style::default().fg(theme::TEXT_MUTED),
+            ),
             Span::styled(&display_val, style),
             if is_active {
                 Span::styled("_", Style::default().fg(theme::PRIMARY))

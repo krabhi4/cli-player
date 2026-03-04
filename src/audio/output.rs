@@ -1,9 +1,9 @@
 use anyhow::{Context, Result};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{Device, Stream, StreamConfig};
+use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::mpsc;
-use std::sync::Arc;
 
 pub struct AudioOutput {
     _stream: Stream,
@@ -143,11 +143,7 @@ impl AudioOutput {
     pub fn enumerate_devices() -> Vec<String> {
         let host = cpal::default_host();
         host.output_devices()
-            .map(|devices| {
-                devices
-                    .filter_map(|d| d.name().ok())
-                    .collect()
-            })
+            .map(|devices| devices.filter_map(|d| d.name().ok()).collect())
             .unwrap_or_default()
     }
 }

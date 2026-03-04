@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Cell, Paragraph, Row, Table};
-use ratatui::Frame;
 
 use crate::subsonic::Song;
 use crate::tui::theme;
@@ -30,7 +30,7 @@ pub fn render(
 
     let chunks = Layout::vertical([
         Constraint::Length(1), // Info
-        Constraint::Min(1),   // Queue table
+        Constraint::Min(1),    // Queue table
     ])
     .split(inner);
 
@@ -54,11 +54,7 @@ pub fn render(
         .iter()
         .enumerate()
         .map(|(i, s)| {
-            let marker = if i as i32 == current_index {
-                ">"
-            } else {
-                " "
-            };
+            let marker = if i as i32 == current_index { ">" } else { " " };
             let style = if i as i32 == current_index {
                 Style::default()
                     .fg(theme::PRIMARY)
@@ -83,11 +79,7 @@ pub fn render(
 
     let table = Table::new(rows, widths)
         .block(Block::default().borders(Borders::NONE))
-        .row_highlight_style(
-            Style::default()
-                .bg(theme::CURSOR_BG)
-                .fg(theme::TEXT),
-        );
+        .row_highlight_style(Style::default().bg(theme::CURSOR_BG).fg(theme::TEXT));
 
     let mut state = ratatui::widgets::TableState::default();
     state.select(selected);

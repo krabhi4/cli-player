@@ -1,6 +1,8 @@
-use cli_music_player::audio::pipeline::{convert_channels, AudioCommand, AudioEvent, PlaybackState};
+use cli_music_player::audio::pipeline::{
+    AudioCommand, AudioEvent, PlaybackState, convert_channels,
+};
 use cli_music_player::config::AppConfig;
-use cli_music_player::equalizer::{Equalizer, EQ_BANDS, EQ_BAND_LABELS, GAIN_MAX, GAIN_MIN};
+use cli_music_player::equalizer::{EQ_BAND_LABELS, EQ_BANDS, Equalizer, GAIN_MAX, GAIN_MIN};
 use cli_music_player::queue::{QueueManager, RepeatMode};
 use cli_music_player::subsonic::Song;
 use tempfile::tempdir;
@@ -740,7 +742,10 @@ fn test_equalizer_load_preset_changes_gains() {
 
     // Load bass boost (can't call load_preset without Player, so test via config)
     let bass_boost = config.get_eq_preset("Bass Boost").unwrap();
-    assert!(bass_boost.gains[0] > 0.0, "Bass Boost should have positive first band");
+    assert!(
+        bass_boost.gains[0] > 0.0,
+        "Bass Boost should have positive first band"
+    );
     assert_eq!(bass_boost.gains.len(), 18);
 }
 
@@ -1049,8 +1054,14 @@ fn test_audio_event_clone() {
     };
     let cloned = event.clone();
     if let (
-        AudioEvent::PositionUpdate { position: p1, duration: d1 },
-        AudioEvent::PositionUpdate { position: p2, duration: d2 },
+        AudioEvent::PositionUpdate {
+            position: p1,
+            duration: d1,
+        },
+        AudioEvent::PositionUpdate {
+            position: p2,
+            duration: d2,
+        },
     ) = (&event, &cloned)
     {
         assert_eq!(p1, p2);
@@ -1061,7 +1072,10 @@ fn test_audio_event_clone() {
 #[test]
 fn test_audio_event_debug_format() {
     let events: Vec<AudioEvent> = vec![
-        AudioEvent::PositionUpdate { position: 0.0, duration: 0.0 },
+        AudioEvent::PositionUpdate {
+            position: 0.0,
+            duration: 0.0,
+        },
         AudioEvent::StateChange(PlaybackState::Stopped),
         AudioEvent::TrackEnd,
         AudioEvent::Error("test error".into()),

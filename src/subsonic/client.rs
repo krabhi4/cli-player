@@ -297,18 +297,13 @@ impl SubsonicClient {
             params.push(("songId", id));
         }
         let resp = self.request("createPlaylist.view", &params).await?;
-        let id = resp["playlist"]["id"]
-            .as_str()
-            .unwrap_or("")
-            .to_string();
+        let id = resp["playlist"]["id"].as_str().unwrap_or("").to_string();
         Ok(id)
     }
 
     // ── Starred / Favourites ────────────────────────────────────────
 
-    pub async fn get_starred(
-        &self,
-    ) -> Result<(Vec<Artist>, Vec<Album>, Vec<Song>), SubsonicError> {
+    pub async fn get_starred(&self) -> Result<(Vec<Artist>, Vec<Album>, Vec<Song>), SubsonicError> {
         let resp = self.request("getStarred2.view", &[]).await?;
         let starred = &resp["starred2"];
         let artists = starred["artist"]
@@ -360,10 +355,7 @@ impl SubsonicClient {
             params.push(("title", title));
         }
         let resp = self.request("getLyrics.view", &params).await?;
-        let lyrics = resp["lyrics"]["value"]
-            .as_str()
-            .unwrap_or("")
-            .to_string();
+        let lyrics = resp["lyrics"]["value"].as_str().unwrap_or("").to_string();
         Ok(lyrics)
     }
 

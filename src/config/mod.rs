@@ -70,7 +70,10 @@ impl AppConfig {
         };
 
         if let Some(servers) = data["servers"].as_array() {
-            self.servers = servers.iter().filter_map(ServerConfig::from_value).collect();
+            self.servers = servers
+                .iter()
+                .filter_map(ServerConfig::from_value)
+                .collect();
         }
         if let Some(idx) = data["active_server_index"].as_i64() {
             self.active_server_index = idx as i32;
@@ -79,10 +82,7 @@ impl AppConfig {
             self.active_eq_preset = preset.to_string();
         }
         if let Some(gains) = data["custom_eq_gains"].as_array() {
-            self.custom_eq_gains = gains
-                .iter()
-                .map(|v| v.as_f64().unwrap_or(0.0))
-                .collect();
+            self.custom_eq_gains = gains.iter().map(|v| v.as_f64().unwrap_or(0.0)).collect();
         }
         if let Some(vol) = data["volume"].as_u64() {
             self.volume = vol as u32;
@@ -137,8 +137,7 @@ impl AppConfig {
     }
 
     pub fn active_server(&self) -> Option<&ServerConfig> {
-        if self.active_server_index >= 0
-            && (self.active_server_index as usize) < self.servers.len()
+        if self.active_server_index >= 0 && (self.active_server_index as usize) < self.servers.len()
         {
             Some(&self.servers[self.active_server_index as usize])
         } else {

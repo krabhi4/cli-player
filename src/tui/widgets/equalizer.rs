@@ -1,8 +1,8 @@
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph};
-use ratatui::Frame;
 
 use crate::equalizer::{EQ_BAND_LABELS, GAIN_MAX, GAIN_MIN};
 use crate::tui::theme;
@@ -33,7 +33,7 @@ pub fn render(
     let chunks = Layout::vertical([
         Constraint::Length(1), // Controls row
         Constraint::Length(1), // Spacer
-        Constraint::Min(1),   // Band sliders
+        Constraint::Min(1),    // Band sliders
         Constraint::Length(1), // Gain labels
         Constraint::Length(1), // Freq labels
     ])
@@ -97,10 +97,7 @@ pub fn render(
                 Style::default().fg(theme::BORDER)
             };
             let span = Span::styled(ch, style);
-            f.render_widget(
-                Paragraph::new(Line::from(span)),
-                Rect::new(x + 1, y, 1, 1),
-            );
+            f.render_widget(Paragraph::new(Line::from(span)), Rect::new(x + 1, y, 1, 1));
         }
 
         // Gain value label

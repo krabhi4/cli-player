@@ -32,10 +32,8 @@ impl Player {
         self.pipeline.send(AudioCommand::Play {
             url: url.to_string(),
         });
-        self.pipeline
-            .send(AudioCommand::SetVolume(self.volume));
-        self.pipeline
-            .send(AudioCommand::SetMuted(self.muted));
+        self.pipeline.send(AudioCommand::SetVolume(self.volume));
+        self.pipeline.send(AudioCommand::SetMuted(self.muted));
     }
 
     pub fn pause(&mut self) {
@@ -92,8 +90,7 @@ impl Player {
 
     pub fn set_volume(&mut self, vol: u32) {
         self.volume = vol.min(100);
-        self.pipeline
-            .send(AudioCommand::SetVolume(self.volume));
+        self.pipeline.send(AudioCommand::SetVolume(self.volume));
     }
 
     pub fn volume_up(&mut self, step: u32) {
@@ -106,18 +103,15 @@ impl Player {
 
     pub fn mute_toggle(&mut self) {
         self.muted = !self.muted;
-        self.pipeline
-            .send(AudioCommand::SetMuted(self.muted));
+        self.pipeline.send(AudioCommand::SetMuted(self.muted));
     }
 
     pub fn set_eq_gains(&mut self, gains: &[f64]) {
-        self.pipeline
-            .send(AudioCommand::SetEqGains(gains.to_vec()));
+        self.pipeline.send(AudioCommand::SetEqGains(gains.to_vec()));
     }
 
     pub fn set_eq_enabled(&mut self, enabled: bool) {
-        self.pipeline
-            .send(AudioCommand::SetEqEnabled(enabled));
+        self.pipeline.send(AudioCommand::SetEqEnabled(enabled));
     }
 
     /// Poll audio events. Call this from the TUI tick.
