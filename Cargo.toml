@@ -2,6 +2,7 @@
 name = "cli-music-player"
 version = "3.0.0"
 edition = "2024"
+description = "TUI music player for Navidrome/Subsonic servers"
 
 [dependencies]
 # Audio
@@ -43,7 +44,6 @@ tempfile = "3"
 
 [package.metadata.deb]
 maintainer = "krabhi4"
-description = "TUI music player for Navidrome/Subsonic servers"
 section = "sound"
 priority = "optional"
 depends = "libasound2"
