@@ -224,11 +224,11 @@ impl QueueManager {
                 .filter(|&i| i != self.current_index)
                 .collect();
             if !remaining.is_empty() {
-                let mut rng = rand::thread_rng();
-                self.current_index = remaining[rng.gen_range(0..remaining.len())];
+                let mut rng = rand::rng();
+                self.current_index = remaining[rng.random_range(0..remaining.len())];
             } else if self.repeat == RepeatMode::All {
-                let mut rng = rand::thread_rng();
-                self.current_index = rng.gen_range(0..self.queue.len() as i32);
+                let mut rng = rand::rng();
+                self.current_index = rng.random_range(0..self.queue.len() as i32);
             } else {
                 return None;
             }
@@ -309,7 +309,7 @@ impl QueueManager {
             .filter(|(i, _)| *i != self.current_index as usize)
             .map(|(_, s)| s.clone())
             .collect();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         others.shuffle(&mut rng);
         if let Some(cur) = current {
             self.queue = std::iter::once(cur).chain(others).collect();

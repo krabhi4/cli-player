@@ -7,8 +7,8 @@ pub const CLIENT_NAME: &str = "CLIMusicPlayer";
 
 /// Generate authentication parameters using the token+salt method.
 pub fn auth_params(username: &str, password: &str) -> HashMap<String, String> {
-    let salt: String = rand::thread_rng()
-        .sample_iter(&rand::distributions::Alphanumeric)
+    let salt: String = rand::rng()
+        .sample_iter(&rand::distr::Alphanumeric)
         .take(32)
         .map(char::from)
         .collect();
