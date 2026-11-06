@@ -31,7 +31,7 @@ hex = "0.4"
 base64 = "0.22"
 
 # Misc
-rand = "0.8"
+rand = "0.9"
 dirs = "5"
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
