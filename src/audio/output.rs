@@ -27,7 +27,7 @@ impl AudioOutput {
         let device = if let Some(name) = device_name.filter(|n| *n != "auto") {
             host.output_devices()
                 .context("Failed to enumerate output devices")?
-                .find(|d| d.name().map(|n| n == name).unwrap_or(false))
+                .find(|d| d.description().is_ok_and(|desc| desc.name() == name))
                 .context(format!("Audio device '{name}' not found"))?
         } else {
             host.default_output_device()
@@ -35,7 +35,7 @@ impl AudioOutput {
         };
 
         let config = device.default_output_config()?;
-        let sample_rate = config.sample_rate().0;
+        let sample_rate = config.sample_rate();
         let channels = config.channels();
 
         let (tx, rx) = mpsc::sync_channel::<Vec<f32>>(8);
@@ -46,7 +46,7 @@ impl AudioOutput {
 
         let stream = Self::build_stream(
             &device,
-            &config.into(),
+            config.into(),
             rx,
             Arc::clone(&paused),
             Arc::clone(&volume),
@@ -69,7 +69,7 @@ impl AudioOutput {
 
     fn build_stream(
         device: &Device,
-        config: &StreamConfig,
+        config: StreamConfig,
         rx: mpsc::Receiver<Vec<f32>>,
         paused: Arc<AtomicBool>,
         volume: Arc<AtomicU32>,
@@ -143,7 +143,11 @@ impl AudioOutput {
     pub fn enumerate_devices() -> Vec<String> {
         let host = cpal::default_host();
         host.output_devices()
-            .map(|devices| devices.filter_map(|d| d.name().ok()).collect())
+            .map(|devices| {
+                devices
+                    .filter_map(|d| d.description().ok().map(|desc| desc.name().to_string()))
+                    .collect()
+            })
             .unwrap_or_default()
     }
 }
