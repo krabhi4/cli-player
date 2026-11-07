@@ -451,26 +451,24 @@ impl App {
                     self.play_song(&song);
                 }
             }
-            AudioEvent::PositionUpdate { position, duration } => {
-                // Scrobble check
-                if !self.scrobble_reported && duration > 0.0 {
-                    let at_50_percent = position >= duration * 0.5;
-                    let at_240s = position >= 240.0;
-                    if at_50_percent || at_240s {
-                        self.scrobble_reported = true;
-                        if let (Some(client), Some(song)) =
-                            (&self.client, &self.player.current_song)
-                        {
-                            let song_id = song.id.clone();
-                            // Fire-and-forget: spawn async task to avoid blocking UI
-                            let url = client.base_url().to_string();
-                            let username = client.username().to_string();
-                            let password = client.password().to_string();
-                            self.rt.spawn(async move {
-                                let c = SubsonicClient::new(&url, &username, &password);
-                                let _ = c.scrobble(&song_id, true).await;
-                            });
-                        }
+            // Scrobble check
+            AudioEvent::PositionUpdate { position, duration }
+                if !self.scrobble_reported && duration > 0.0 =>
+            {
+                let at_50_percent = position >= duration * 0.5;
+                let at_240s = position >= 240.0;
+                if at_50_percent || at_240s {
+                    self.scrobble_reported = true;
+                    if let (Some(client), Some(song)) = (&self.client, &self.player.current_song) {
+                        let song_id = song.id.clone();
+                        // Fire-and-forget: spawn async task to avoid blocking UI
+                        let url = client.base_url().to_string();
+                        let username = client.username().to_string();
+                        let password = client.password().to_string();
+                        self.rt.spawn(async move {
+                            let c = SubsonicClient::new(&url, &username, &password);
+                            let _ = c.scrobble(&song_id, true).await;
+                        });
                     }
                 }
             }
@@ -1006,18 +1004,16 @@ impl App {
                             }
                         }
                     }
-                    4 => {
-                        if idx < self.genres.len() {
-                            let genre = self.genres[idx].name.clone();
-                            if let Some(client) = &self.client
-                                && let Ok(songs) =
-                                    self.rt.block_on(client.get_songs_by_genre(&genre, 50, 0))
-                            {
-                                self.push_nav();
-                                self.songs = songs;
-                                self.active_tab = 2;
-                                self.tab_selected[2] = Some(0);
-                            }
+                    4 if idx < self.genres.len() => {
+                        let genre = self.genres[idx].name.clone();
+                        if let Some(client) = &self.client
+                            && let Ok(songs) =
+                                self.rt.block_on(client.get_songs_by_genre(&genre, 50, 0))
+                        {
+                            self.push_nav();
+                            self.songs = songs;
+                            self.active_tab = 2;
+                            self.tab_selected[2] = Some(0);
                         }
                     }
                     _ => {}
@@ -1263,16 +1259,14 @@ impl App {
                     }
                 }
             }
-            2 => {
-                if idx < self.search_artists.len() {
-                    let artist_id = self.search_artists[idx].id.clone();
-                    if let Some(client) = &self.client
-                        && let Ok((_, albums)) = self.rt.block_on(client.get_artist(&artist_id))
-                    {
-                        self.albums = albums;
-                        self.active_tab = 0;
-                        self.tab_selected[0] = Some(0);
-                    }
+            2 if idx < self.search_artists.len() => {
+                let artist_id = self.search_artists[idx].id.clone();
+                if let Some(client) = &self.client
+                    && let Ok((_, albums)) = self.rt.block_on(client.get_artist(&artist_id))
+                {
+                    self.albums = albums;
+                    self.active_tab = 0;
+                    self.tab_selected[0] = Some(0);
                 }
             }
             _ => {}
