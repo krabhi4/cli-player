@@ -1,5 +1,5 @@
 use md5::{Digest, Md5};
-use rand::Rng;
+use rand::RngExt;
 use std::collections::HashMap;
 
 pub const API_VERSION: &str = "1.16.1";
