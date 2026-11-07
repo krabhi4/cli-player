@@ -1,5 +1,5 @@
-use aes_gcm::aead::{Aead, KeyInit, OsRng};
-use aes_gcm::{AeadCore, Aes256Gcm, Nonce};
+use aes_gcm::aead::{Aead, Generate, KeyInit};
+use aes_gcm::{Aes256Gcm, Nonce};
 use pbkdf2::pbkdf2_hmac;
 use sha2::Sha256;
 
@@ -24,7 +24,7 @@ fn derive_key() -> [u8; 32] {
 pub fn encrypt_password(password: &str) -> String {
     let key = derive_key();
     let cipher = Aes256Gcm::new_from_slice(&key).expect("valid key size");
-    let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+    let nonce = Nonce::generate();
     let ciphertext = cipher
         .encrypt(&nonce, password.as_bytes())
         .expect("encryption should not fail");
@@ -45,8 +45,8 @@ pub fn decrypt_password(encrypted: &str) -> Result<String, String> {
 
     let key = derive_key();
     let cipher = Aes256Gcm::new_from_slice(&key).map_err(|e| format!("cipher init error: {e}"))?;
-    let nonce = Nonce::from_slice(&combined[..12]);
-    let plaintext = cipher.decrypt(nonce, &combined[12..]).map_err(|_| {
+    let nonce = Nonce::try_from(&combined[..12]).map_err(|e| format!("nonce error: {e}"))?;
+    let plaintext = cipher.decrypt(&nonce, &combined[12..]).map_err(|_| {
         "Cannot decrypt password. This may happen if the password was \
              encrypted on a different machine. Please re-enter your password."
             .to_string()

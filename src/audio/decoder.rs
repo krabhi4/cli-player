@@ -2,12 +2,11 @@ use std::io::{Read, Seek, SeekFrom};
 use std::sync::Mutex;
 
 use anyhow::{Context, Result};
-use symphonia::core::audio::SampleBuffer;
-use symphonia::core::codecs::{CODEC_TYPE_NULL, Decoder, DecoderOptions};
-use symphonia::core::formats::{FormatOptions, FormatReader, SeekMode, SeekTo};
+use symphonia::core::codecs::audio::{AudioDecoder as SymphoniaDecoder, AudioDecoderOptions};
+use symphonia::core::formats::probe::Hint;
+use symphonia::core::formats::{FormatOptions, FormatReader, SeekMode, SeekTo, TrackType};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
-use symphonia::core::probe::Hint;
 use symphonia::core::units::Time;
 
 /// Wraps a reqwest blocking response body as a symphonia MediaSource.
@@ -47,7 +46,7 @@ impl symphonia::core::io::MediaSource for HttpSource {
 
 pub struct AudioDecoder {
     format_reader: Box<dyn FormatReader>,
-    decoder: Box<dyn Decoder>,
+    decoder: Box<dyn SymphoniaDecoder>,
     track_id: u32,
     sample_rate: u32,
     channels: usize,
@@ -74,35 +73,39 @@ impl AudioDecoder {
             hint.with_extension(ext_clean);
         }
 
-        let probed = symphonia::default::get_probe()
-            .format(
+        let format_reader = symphonia::default::get_probe()
+            .probe(
                 &hint,
                 mss,
-                &FormatOptions::default(),
-                &MetadataOptions::default(),
+                FormatOptions::default(),
+                MetadataOptions::default(),
             )
             .context("Failed to probe audio format")?;
 
-        let format_reader = probed.format;
-
         let track = format_reader
-            .tracks()
-            .iter()
-            .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
+            .default_track(TrackType::Audio)
             .context("No audio track found")?;
 
         let track_id = track.id;
-        let codec_params = &track.codec_params;
+        let codec_params = track
+            .codec_params
+            .as_ref()
+            .and_then(|p| p.audio())
+            .context("No audio codec parameters found")?;
 
         let sample_rate = codec_params.sample_rate.unwrap_or(44100);
-        let channels = codec_params.channels.map(|c| c.count()).unwrap_or(2);
+        let channels = codec_params
+            .channels
+            .as_ref()
+            .map(|c| c.count())
+            .unwrap_or(2);
 
-        let duration_secs = codec_params
-            .n_frames
+        let duration_secs = track
+            .num_frames
             .map(|frames| frames as f64 / sample_rate as f64);
 
         let decoder = symphonia::default::get_codecs()
-            .make(codec_params, &DecoderOptions::default())
+            .make_audio_decoder(codec_params, &AudioDecoderOptions::default())
             .context("Failed to create decoder")?;
 
         Ok(Self {
@@ -131,11 +134,11 @@ impl AudioDecoder {
     pub fn next_packet(&mut self) -> Option<Vec<f32>> {
         loop {
             let packet = match self.format_reader.next_packet() {
-                Ok(p) => p,
-                Err(_) => return None,
+                Ok(Some(p)) => p,
+                _ => return None,
             };
 
-            if packet.track_id() != self.track_id {
+            if packet.track_id != self.track_id {
                 continue;
             }
 
@@ -145,20 +148,17 @@ impl AudioDecoder {
                 Err(_) => return None,
             };
 
-            let spec = *decoded.spec();
-            let num_frames = decoded.frames();
+            let mut samples = Vec::new();
+            decoded.copy_to_vec_interleaved(&mut samples);
 
-            let mut sample_buf = SampleBuffer::<f32>::new(num_frames as u64, spec);
-            sample_buf.copy_interleaved_ref(decoded);
-
-            return Some(sample_buf.samples().to_vec());
+            return Some(samples);
         }
     }
 
     /// Attempt to seek to a position in seconds.
     pub fn seek(&mut self, position_secs: f64) -> Result<()> {
         let seek_to = SeekTo::Time {
-            time: Time::from(position_secs),
+            time: Time::try_from_secs_f64(position_secs).context("Invalid seek position")?,
             track_id: Some(self.track_id),
         };
         self.format_reader
