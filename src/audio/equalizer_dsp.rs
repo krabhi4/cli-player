@@ -158,8 +158,8 @@ impl EqualizerDsp {
                     break;
                 }
                 let mut sample = samples[idx] as f64;
-                for band in 0..18 {
-                    sample = self.filters[ch][band].process(sample);
+                for filter in &mut self.filters[ch] {
+                    sample = filter.process(sample);
                 }
                 samples[idx] = sample as f32;
             }
